@@ -1,0 +1,22 @@
+BootStrap: localimage
+From: scipion-base.def
+
+%labels
+  Maintainer miceta@cnb.csic.es
+  version 24.02.1
+
+%help
+  Tomography package add-on for Apptainer/Singularity base image
+
+%files
+/scipion
+/opt
+
+%post
+/scipion/scipion3 installp -p scipion-em-tomo
+/scipion/scipion3 installp -p scipion-em-xmipptomo
+/scipion/scipion3 installp -p scipion-em-tomotwin
+/scipion/scipion3 installp -p scipion-em-tomoviz
+/scipion/scipion3 installp -p scipion-em-sphire
+
+
