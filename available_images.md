@@ -1,19 +1,57 @@
-# List of available Scipion container images
-
-The following images are available through our Harbor server at images.i2pc.es.
-
-|          	|            **scipion-base:22.04**           	| **scipion-spa:2401.1** 	| **scipion-flex:2401.1** 	| **scipion-tomo:2401.1** 	| **scipion-chem:2401.1** 	|
-|:--------:	|:-------------------------------------------:	|:----------------------:	|:-----------------------:	|:-----------------------:	|:-----------------------:	|
-| **Base** 	| nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 	|   scipion-base:22.04   	|    scipion-base:22.04   	|    scipion-base:22.04   	|    scipion-base:22.04   	|
-| **CUDA** 	|                    11.8.0                   	|         11.8.0         	|          11.8.0         	|          11.8.0         	|          11.8.0         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
-|          	|                                             	|                        	|                         	|                         	|                         	|
+# List of plugins per image
+|                                	|               **scipion-base**              	| **scipion-spa** 	| **scipion-modeling** 	| **scipion-tomo** 	| **scipion-chem** 	|
+|--------------------------------	|:-------------------------------------------:	|:---------------:	|:--------------------:	|:----------------:	|:----------------:	|
+| **Image base**                 	| nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 	|   scipion-base  	|     scipion-base     	|   scipion-base   	|   scipion-base   	|
+| **CUDA**                       	|                    11.8.0                   	|      11.8.0     	|        11.8.0        	|      11.8.0      	|      11.8.0      	|
+| **OpenCV**                     	|                      -                      	|        -        	|           -          	|         -        	|         -        	|
+| **scipion-em-aretomo**         	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-atomstructutils** 	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-atsas**           	|                      -                      	|        -        	|           -          	|         -        	|         -        	|
+| **scipion-em-bsoft**           	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-ccp4**            	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-chimera**         	|                      X                      	|        X        	|           X          	|         X        	|         X        	|
+| **scipion-em-cistem**          	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-continuousflex**  	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-cryoassess**      	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-cryocare**        	|                      -                      	|        -        	|           -          	|         -        	|         -        	|
+| **scipion-em-cryodrgn**        	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-cryoef**          	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-deepfinder**      	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-dynamo**          	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-eman2**           	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-emantomo**        	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-embuild**         	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-empiar**          	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-emready**         	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-facilities**      	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-flexutils**       	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-fsc3d**           	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-gautomatch**      	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-gctf**            	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-imod**            	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-isonet**          	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-localrec**        	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-localscale**      	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-modelangelo**     	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-motioncorr**      	|                      -                      	|        X        	|           -          	|         X        	|         -        	|
+| **scipion-em-novactf**         	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-phenix**          	|                      -                      	|        -        	|           X          	|         -        	|         -        	|
+| **scipion-em-prody**           	|                      -                      	|        X        	|           X          	|         -        	|         -        	|
+| **scipion-em-pyseg**           	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-relion**          	|                      -                      	|        X        	|           -          	|         X        	|         -        	|
+| **scipion-em-reliontomo**      	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-repic**           	|                      -                      	|        X        	|           -          	|         X        	|         -        	|
+| **scipion-em-resmap**          	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-sidesplitter**    	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-sphire**          	|                      -                      	|        X        	|           -          	|         X        	|         -        	|
+| **scipion-em-spider**          	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-spoc**            	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-susantomo**       	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-tomo**            	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-tomo3d**          	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-tomotwin**        	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-tomoviz**         	|                      -                      	|        -        	|           -          	|         X        	|         -        	|
+| **scipion-em-topaz**           	|                      -                      	|        X        	|           -          	|         X        	|         -        	|
+| **scipion-em-warp**            	|                      -                      	|        X        	|           -          	|         -        	|         -        	|
+| **scipion-em-xmipp**           	|                      X                      	|        X        	|           X          	|         X        	|         X        	|
+| **scipion-em-xmipptomo**       	|                      -                      	|        -        	|           -          	|         -        	|         -        	|
