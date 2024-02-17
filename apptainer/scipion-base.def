@@ -26,10 +26,12 @@ ls -l /dev/nvidia*
 
 # Dependencies
 apt update
-# General things
-apt install -y --no-install-recommends --no-install-suggests nano vim less wget 
-# Xmipp + Scipion
-apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 libopenmpi-dev make scons libfftw3-dev libopenmpi-dev libhdf5-dev python3-numpy python3-dev libtiff5-dev libsqlite3-dev default-jdk git cmake
+# Utilities
+apt install -y --no-install-recommends --no-install-suggests curl git less nano wget vim python3-numpy python3-dev
+# Compilation
+apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk
+# Xmipp + Scipion libraries
+apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
 
 # Miniforge installation
 wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
