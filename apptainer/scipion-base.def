@@ -9,11 +9,6 @@ From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 %help
   Base recipe for Scipion on Apptainer/Singularity image generation.
 
-%environment
-TZ=UTC
-DEBIAN_FRONTEND=noninteractive
-export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
-
 %post
 # Ezport tz for apt so it does not block on install
 export TZ=UTC
