@@ -25,7 +25,7 @@ apt update
 # Utilities
 apt install -y --no-install-recommends --no-install-suggests curl git less nano wget vim python3-numpy python3-dev
 # Compilation
-apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk
+apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk rsync
 # Xmipp + Scipion libraries
 apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
 
@@ -47,13 +47,13 @@ conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
-echo -e "\n\n" >> /scipion/config/scipion.conf
+# echo -e "\n\n" >> /scipion/config/scipion.conf
 echo -e "MPI_BINDIR=/usr/bin\n" >> /scipion/config/scipion.conf
 echo -e "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/scipion.conf
 echo -e "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
 echo -e "CUDA = True\n" >> /scipion/config/scipion.conf
 echo -e "OPENCV = False\n" >> /scipion/config/scipion.conf
-echo -e "\n\n" >> /scipion/config/scipion.conf
+# echo -e "\n\n" >> /scipion/config/scipion.conf
 
 # Xmipp base
 /scipion/scipion3 installp -p scipion-em-xmipp -j 16
