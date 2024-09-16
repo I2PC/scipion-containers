@@ -42,7 +42,7 @@ export PATH="/opt/miniforge3/bin:${PATH}"
 # Scipion installation
 mkdir /scipion
 conda run -n base pip3 install --user scipion-installer scons numpy
-conda run -n base python3 -m scipioninstaller -conda -noXmipp -noAsk /scipion
+conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
 
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
