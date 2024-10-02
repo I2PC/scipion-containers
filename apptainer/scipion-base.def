@@ -44,6 +44,9 @@ mkdir /scipion
 conda run -n base pip3 install --user scipion-installer scons numpy
 conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
 
+# Create data folder
+  mkdir -p /data
+
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
@@ -54,6 +57,12 @@ echo -e "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/co
 echo -e "CUDA = True\n" >> /scipion/config/scipion.conf
 echo -e "OPENCV = False\n" >> /scipion/config/scipion.conf
 # echo -e "\n\n" >> /scipion/config/scipion.conf
+
+# Change paths in config
+sed -i 's|SCIPION_LOGS *= *.*|SCIPION_LOGS = /data/ScipionUserData/logs|' /scipion/config/scipion.conf
+sed -i 's|^SCIPION_LOG *= *.*|SCIPION_LOG = /data/ScipionUserData/logs/scipion.log|' /scipion/config/scipion.conf
+sed -i 's|^SCIPION_TESTS_OUTPUT *= *.*|SCIPION_TESTS_OUTPUT = /data/ScipionUserData/Tests|' /scipion/config/scipion.conf
+sed -i 's|^SCIPION_USER_DATA *= *.*|SCIPION_USER_DATA = /data/ScipionUserData|' /scipion/config/scipion.conf
 
 # Xmipp base
 /scipion/scipion3 installp -p scipion-em-xmipp -j 16
