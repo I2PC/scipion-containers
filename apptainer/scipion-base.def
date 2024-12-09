@@ -2,16 +2,12 @@ Bootstrap:docker
 From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 
 %labels
-  Maintainer miceta@cnb.csic.es
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 md.sanchez@cnb.csic.es
   Version 24.02.1
 
 %help
   Base recipe for Scipion on Apptainer/Singularity image generation.
-
-%environment
-TZ=UTC
-DEBIAN_FRONTEND=noninteractive
-export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
 %post
 # Ezport tz for apt so it does not block on install
@@ -29,7 +25,7 @@ apt update
 # Utilities
 apt install -y --no-install-recommends --no-install-suggests curl git less nano wget vim python3-numpy python3-dev
 # Compilation
-apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk
+apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk rsync
 # Xmipp + Scipion libraries
 apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
 
@@ -46,18 +42,27 @@ export PATH="/opt/miniforge3/bin:${PATH}"
 # Scipion installation
 mkdir /scipion
 conda run -n base pip3 install --user scipion-installer scons numpy
-conda run -n base python3 -m scipioninstaller -conda -noXmipp -noAsk /scipion
+conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
+
+# Create data folder
+  mkdir -p /data
 
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
-echo -e "\n\n" >> /scipion/config/scipion.conf
+# echo -e "\n\n" >> /scipion/config/scipion.conf
 echo -e "MPI_BINDIR=/usr/bin\n" >> /scipion/config/scipion.conf
 echo -e "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/scipion.conf
 echo -e "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
 echo -e "CUDA = True\n" >> /scipion/config/scipion.conf
 echo -e "OPENCV = False\n" >> /scipion/config/scipion.conf
-echo -e "\n\n" >> /scipion/config/scipion.conf
+# echo -e "\n\n" >> /scipion/config/scipion.conf
+
+# Change paths in config
+sed -i 's|SCIPION_LOGS *= *.*|SCIPION_LOGS = /data/ScipionUserData/logs|' /scipion/config/scipion.conf
+sed -i 's|^SCIPION_LOG *= *.*|SCIPION_LOG = /data/ScipionUserData/logs/scipion.log|' /scipion/config/scipion.conf
+sed -i 's|^SCIPION_TESTS_OUTPUT *= *.*|SCIPION_TESTS_OUTPUT = /data/ScipionUserData/Tests|' /scipion/config/scipion.conf
+sed -i 's|^SCIPION_USER_DATA *= *.*|SCIPION_USER_DATA = /data/ScipionUserData|' /scipion/config/scipion.conf
 
 # Xmipp base
 /scipion/scipion3 installp -p scipion-em-xmipp -j 16
