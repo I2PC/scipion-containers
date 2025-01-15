@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: example_base.sif
+From: scipion-base.sif
 
 %labels
   Maintainer1 miceta@cnb.csic.es
