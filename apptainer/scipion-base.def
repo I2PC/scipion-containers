@@ -39,13 +39,15 @@ echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
 . /opt/miniforge3/etc/profile.d/conda.sh
 export PATH="/opt/miniforge3/bin:${PATH}"
 
+# Create required folders
+mkdir -p /scipion/ScipionUserData
+mkdir -p /scipion/software/em/cryoassess-models
+mkdir /data
+mkdir -p /cryosparc
+
 # Scipion installation
-mkdir /scipion
 conda run -n base pip3 install --user scipion-installer scons numpy
 conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
-
-# Create data folder
-  mkdir -p /data
 
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
