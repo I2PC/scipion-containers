@@ -20,6 +20,7 @@ CRYOASSESS_MODELS_DIR=/route/to/cryoasses_model_folder
 # CS will work only if the container has direct access to the cryosparcm binary
 # Point the container to the folder that contains the cryosparc_master folder
 CRYOSPARC_HOME_DIR=/route/to/cryosparc_master_containing_folder
+CRYOSPARC_PROJECTS_DIR=/route/to/cryosparc_scipion_projects_folder
 export CRYOSPARC_ACCOUNT="mycryosparc@email.com"
 export CRYOSPARC_PASSWORD="mypassword"
 
