@@ -12,6 +12,17 @@
 
 # Available flavours are: base, spa, tomo, full
 CONTAINER_FLAVOUR="spa"
+DIR=""
+if [ "$#" -gt 1 ]; then
+    if [ -d "${1}" ]; then
+        DIR="${1}"
+    else
+        echo ""${1}" does not exist".
+        DIR="."
+    fi
+else
+    DIR="."
+fi
 
 ###
 ###
@@ -23,6 +34,6 @@ git pull
 
 echo "Compiling $CONTAINER_FLAVOUR image..."
 TARGET="scipion-$CONTAINER_FLAVOUR"
-apptainer build $TARGET.sif $TARGET.def
+apptainer build $TARGET.sif $DIR/$TARGET.def
 
 echo "Finished."
