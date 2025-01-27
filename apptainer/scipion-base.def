@@ -53,12 +53,11 @@ conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
 # echo -e "\n\n" >> /scipion/config/scipion.conf
-echo -e "MPI_BINDIR=/usr/bin\n" >> /scipion/config/scipion.conf
-echo -e "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/scipion.conf
-echo -e "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
-echo -e "CUDA = True\n" >> /scipion/config/scipion.conf
-echo -e "OPENCV = False\n" >> /scipion/config/scipion.conf
-# echo -e "\n\n" >> /scipion/config/scipion.conf
+echo "MPI_BINDIR=/usr/bin\n" >> /scipion/config/scipion.conf
+echo "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/scipion.conf
+echo "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
+echo "CUDA = True\n" >> /scipion/config/scipion.conf
+echo "OPENCV = False\n" >> /scipion/config/scipion.conf
 
 # Change paths in config
 sed -i 's|SCIPION_LOGS *= *.*|SCIPION_LOGS = /data/ScipionUserData/logs|' /scipion/config/scipion.conf
