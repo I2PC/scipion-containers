@@ -52,7 +52,6 @@ conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
-# echo -e "\n\n" >> /scipion/config/scipion.conf
 echo "MPI_BINDIR=/usr/bin\n" >> /scipion/config/scipion.conf
 echo "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/scipion.conf
 echo "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
