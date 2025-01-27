@@ -34,6 +34,6 @@ git pull
 
 echo "Compiling $CONTAINER_FLAVOUR image..."
 TARGET="scipion-$CONTAINER_FLAVOUR"
-apptainer build $TARGET.sif $DIR/$TARGET.def
+apptainer build ./apptainer/$TARGET.sif $DIR/$TARGET.def
 
 echo "Finished."
