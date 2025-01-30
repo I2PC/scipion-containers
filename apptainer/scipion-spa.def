@@ -39,6 +39,14 @@ ln -s /usr/lib/x86_64-linux-gnu/libffi.so.8 /usr/lib/x86_64-linux-gnu/libffi.so.
 # /scipion/scipion3 installp -p scipion-em-gautomatch
 # /scipion/scipion3 installp -p scipion-em-gctf
 
+# Cryosparc
+conda create --name pyem-23.01.25 python=3.8
+/scipion/scipion3 installp -p scipion-em-cryosparc2
+
+/scipion/scipion3 installb deepLearningToolkit
+
+git clone -b master https://github.com/scipion-em/scipion-em-miffi.git /scipion/scipion-em-miffi
+/scipion/scipion3 installp -p /scipion/scipion-em-miffi --devel
 
 /scipion/scipion3 installp -p scipion-em-sphire
 /scipion/scipion3 installp -p scipion-em-spider
