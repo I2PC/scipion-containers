@@ -17,12 +17,14 @@ if [ "$#" -gt 1 ]; then
     if [ -d "${1}" ]; then
         DIR="${1}"
     else
-        echo ""${1}" does not exist".
+        echo "${1} does not exist".
         DIR="."
     fi
 else
     DIR="."
 fi
+
+echo "OUTPUT DIR IS $DIR"
 
 ###
 ###
@@ -32,8 +34,10 @@ echo "Preparing to build Scipion Apptainer image locally..."
 echo "Getting latest version from GitHub..."
 git pull
 
-echo "Compiling $CONTAINER_FLAVOUR image..."
 TARGET="scipion-$CONTAINER_FLAVOUR"
-apptainer build ./apptainer/$TARGET.sif $DIR/$TARGET.def
+
+echo "Compiling $CONTAINER_FLAVOUR image..."
+echo "Result will be in $DIR/$TARGET.sif"
+apptainer build ./tests/scipion-base.sif ./apptainer/scipion-base.def
 
 echo "Finished."
