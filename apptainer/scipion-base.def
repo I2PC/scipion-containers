@@ -39,12 +39,6 @@ echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
 . /opt/miniforge3/etc/profile.d/conda.sh
 export PATH="/opt/miniforge3/bin:${PATH}"
 
-# Create required folders
-mkdir -p /scipion/ScipionUserData
-mkdir -p /scipion/software/em/cryoassess-models
-mkdir /data
-mkdir -p /cryosparc
-
 # Scipion installation
 conda run -n base pip3 install --user scipion-installer scons numpy
 conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
@@ -57,12 +51,6 @@ echo "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/sci
 echo "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
 echo "CUDA = True\n" >> /scipion/config/scipion.conf
 echo "OPENCV = False\n" >> /scipion/config/scipion.conf
-
-# Change paths in config
-sed -i 's|SCIPION_LOGS *= *.*|SCIPION_LOGS = /data/ScipionUserData/logs|' /scipion/config/scipion.conf
-sed -i 's|^SCIPION_LOG *= *.*|SCIPION_LOG = /data/ScipionUserData/logs/scipion.log|' /scipion/config/scipion.conf
-sed -i 's|^SCIPION_TESTS_OUTPUT *= *.*|SCIPION_TESTS_OUTPUT = /data/ScipionUserData/Tests|' /scipion/config/scipion.conf
-sed -i 's|^SCIPION_USER_DATA *= *.*|SCIPION_USER_DATA = /data/ScipionUserData|' /scipion/config/scipion.conf
 
 # Xmipp base
 /scipion/scipion3 installp -p scipion-em-xmipp -j 16
