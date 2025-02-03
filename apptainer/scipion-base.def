@@ -28,6 +28,10 @@ apt install -y --no-install-recommends --no-install-suggests curl git less nano 
 apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk rsync
 # Xmipp + Scipion libraries
 apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
+# Slurm libraries
+apt install -y --no-install-recommends --no-install-suggests slurmd slurmctld
+
+# Slurm configuration
 
 # Miniforge installation
 wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
