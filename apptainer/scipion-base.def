@@ -9,6 +9,9 @@ From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 %help
   Base recipe for Scipion on Apptainer/Singularity image generation.
 
+%files
+./slurm.conf /etc/slurm/slurm.conf
+
 %post
 # Ezport tz for apt so it does not block on install
 export TZ=UTC
@@ -23,7 +26,7 @@ ls -l /dev/nvidia*
 # Dependencies
 apt update
 # Utilities
-apt install -y --no-install-recommends --no-install-suggests curl git less nano wget vim python3-numpy python3-dev
+apt install -y --no-install-recommends --no-install-suggests curl git less nano wget vim python3-numpy python3-dev awk
 # Compilation
 apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk rsync
 # Xmipp + Scipion libraries
@@ -36,10 +39,15 @@ SLURM=slurm-24.11.1.tar.bz2
 wget https://download.schedmd.com/slurm/slurm-24.11.1.tar.bz2
 tar -xaf slurm-24.11.1.tar.bz2 -C /slurm
 rm slurm-24.11.1.tar.bz2
-# Slurm installation
+# Slurm base installation
 cd /slurm
 mk-build-deps -i debian/control
 debuild -b -uc -us
+
+# Slurm resources configuration
+echo "AutoDetect=nvidia" > /etc/slurm/gres.conf
+sed -i '' 's/CPUs=1/CPUs=$(nproc)/g' /etc/slurm/slurm.conf
+sed -i '' "/^Nodename=/s/$/ RealMemory=$(free -m | awk '/Mem:/ {print $2}')" /etc/slurm/slurm.conf
 
 # Miniforge installation
 wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
