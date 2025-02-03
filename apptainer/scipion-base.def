@@ -29,9 +29,17 @@ apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make 
 # Xmipp + Scipion libraries
 apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
 # Slurm libraries
-apt install -y --no-install-recommends --no-install-suggests slurmd slurmctld
+apt install -y --no-install-recommends --no-install-suggests build-essential fakeroot devscripts equivs libjwt-dev libgtk2.0-dev libhwloc-dev libbpf-dev libdbus-1-dev
 
-# Slurm configuration
+# Slurm download
+SLURM=slurm-24.11.1.tar.bz2
+wget https://download.schedmd.com/slurm/slurm-24.11.1.tar.bz2
+tar -xaf slurm-24.11.1.tar.bz2 -C /slurm
+rm slurm-24.11.1.tar.bz2
+# Slurm installation
+cd /slurm
+mk-build-deps -i debian/control
+debuild -b -uc -us
 
 # Miniforge installation
 wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
