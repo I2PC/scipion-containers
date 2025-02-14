@@ -1,0 +1,43 @@
+Bootstrap: localimage
+From: scipion-base.sif
+
+%labels
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 md.sanchez@cnb.csic.es
+  Maintainer3 isanchez@cnb.csic.es
+ # version 24.02.1
+
+%help
+  VRS level 0 package add-on for Apptainer/Singularity base image
+
+%post
+    # Export tz for apt so it does not block on install
+    export TZ=UTC
+    export DEBIAN_FRONTEND=noninteractive
+    # Add cuda lib to path
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+
+    # Lets you know if cuda is OK
+    which nvcc
+    ls -l /dev/nvidia*
+
+    # Dependencies
+    apt-get update
+    # needed libraries
+    # chimera
+    apt-get install -y xcb libxcb1-dev libxkbfile-dev qt6-base-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
+    # pdflatex
+    apt-get install -y texlive-latex-extra
+
+    # Installing ChimeraX
+    git clone -b mit_chimerax_containers https://github.com/scipion-em/scipion-em-chimera /scipion/scipion-em-chimera
+    ln -s /usr/lib/x86_64-linux-gnu/libffi.so.8 /usr/lib/x86_64-linux-gnu/libffi.so.6
+    /scipion/scipion3 installp -p /scipion/scipion-em-chimera --devel
+
+    /scipion/scipion3 installb deepLearningToolkit
+
+    git clone https://gitlab.com/jordibc/scipion-em-ucm.git /scipion/scipion-em-ucm
+    /scipion/scipion3 installp -p /scipion/scipion-em-ucm --devel
+
+    git clone -b apptainer https://github.com/I2PC/scipion-em-validation /scipion/scipion-em-validation
+    /scipion/scipion3 pip install -r /scipion/scipion-em-validation/requirements.txt

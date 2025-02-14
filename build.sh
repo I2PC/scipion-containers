@@ -36,6 +36,8 @@ git pull
 
 TARGET="scipion-$CONTAINER_FLAVOUR"
 
+export APPTAINERENV_DISPLAY=$DISPLAY
+
 echo "Compiling $CONTAINER_FLAVOUR image..."
 echo "Result will be in $DIR/$TARGET.sif"
 apptainer build ./tests/scipion-base.sif ./apptainer/scipion-base.def
