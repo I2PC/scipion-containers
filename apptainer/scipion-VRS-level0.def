@@ -34,6 +34,14 @@ From: scipion-base.sif
     ln -s /usr/lib/x86_64-linux-gnu/libffi.so.8 /usr/lib/x86_64-linux-gnu/libffi.so.6
     /scipion/scipion3 installp -p /scipion/scipion-em-chimera --devel
 
+    # deepLearningToolkit
+    /scipion/scipion3 uninstallp -p scipion-em-xmipp
+    cd /scipion
+    git clone https://github.com/I2PC/xmipp.git xmipp-bundle && cd xmipp-bundle
+    /scipion/scipion3 run ./xmipp
+    /scipion/scipion3 installp -p /scipion/xmipp-bundle/src/scipion-em-xmipp --devel -j 16
+    cd /scipion/xmipp-bundle/src/scipion-em-xmipp && git checkout apptainer
+    export CONDA_OVERRIDE_CUDA=11.8
     /scipion/scipion3 installb deepLearningToolkit
 
     git clone https://gitlab.com/jordibc/scipion-em-ucm.git /scipion/scipion-em-ucm
@@ -41,3 +49,12 @@ From: scipion-base.sif
 
     git clone -b apptainer https://github.com/I2PC/scipion-em-validation /scipion/scipion-em-validation
     /scipion/scipion3 pip install -r /scipion/scipion-em-validation/requirements.txt
+
+    # Cleaning tasks for space optimisation
+    apt clean
+    apt autoclean
+    apt autoremove
+    rm -rf /var/lib/apt/lists/*
+    unset DEBIAN_FRONTEND
+
+%runscript
