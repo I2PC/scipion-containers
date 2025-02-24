@@ -40,7 +40,7 @@ From: scipion-base.sif
     git clone https://github.com/I2PC/xmipp.git xmipp-bundle && cd xmipp-bundle
     /scipion/scipion3 run ./xmipp
     /scipion/scipion3 installp -p /scipion/xmipp-bundle/src/scipion-em-xmipp --devel -j 16
-    cd /scipion/xmipp-bundle/src/scipion-em-xmipp && git checkout apptainer
+    cd /scipion/xmipp-bundle/src/scipion-em-xmipp && git checkout isl_apptainer
     export CONDA_OVERRIDE_CUDA=11.8
     /scipion/scipion3 installb deepLearningToolkit
 

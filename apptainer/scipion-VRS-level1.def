@@ -31,8 +31,17 @@ From: scipion-VRS-level0.sif
 
     /scipion/scipion3 installp -p scipion-em-resmap
 
-    /scipion/scipion3 installp -p scipion-em-fsc3d 3.1.1
+    /scipion/scipion3 installp -p scipion-em-fsc3d 3.2.2
 
     rm -rf /scipion/scipion-em-validation
     git clone -b apptainer https://github.com/I2PC/scipion-em-validation /scipion/scipion-em-validation
     /scipion/scipion3 pip install -r /scipion/scipion-em-validation/requirements.txt
+
+    # Cleaning tasks for space optimisation
+    apt clean
+    apt autoclean
+    apt autoremove
+    rm -rf /var/lib/apt/lists/*
+    unset DEBIAN_FRONTEND
+
+%runscript
