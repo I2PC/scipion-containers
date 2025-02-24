@@ -11,33 +11,24 @@
 ###
 
 # Available flavours are: base, spa, tomo, full
-CONTAINER_FLAVOUR="spa"
-DIR=""
-if [ "$#" -gt 1 ]; then
-    if [ -d "${1}" ]; then
-        DIR="${1}"
-    else
-        echo "${1} does not exist".
-        DIR="."
-    fi
-else
-    DIR="."
-fi
-
-echo "OUTPUT DIR IS $DIR"
+CONTAINER_FLAVOURS="base spa"
 
 ###
 ###
 #### END OF USER CONFIGURABLE VARIABLES
 
-echo "Preparing to build Scipion Apptainer image locally..."
+echo "Preparing to build Scipion Apptainer image locally..." 
 echo "Getting latest version from GitHub..."
 git pull
+echo "System will build $CONTAINER_FLAVOURS"
 
-TARGET="scipion-$CONTAINER_FLAVOUR"
+DIR="./tests"
 
-echo "Compiling $CONTAINER_FLAVOUR image..."
-echo "Result will be in $DIR/$TARGET.sif"
-apptainer build ./tests/scipion-base.sif ./apptainer/scipion-base.def
+for F in $CONTAINER_FLAVOURS; do
+    TARGET="scipion-$F"
+    echo "Compiling $TARGET image..."
+    echo "Result will be in $DIR/$TARGET.sif"
+    apptainer build --force $DIR/$TARGET.sif ./apptainer/$TARGET.def
+done
 
 echo "Finished."
