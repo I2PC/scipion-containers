@@ -10,8 +10,8 @@
 ###
 ###
 
-# Available flavours are: base, spa, tomo, full
-CONTAINER_FLAVOURS="base spa"
+# Available flavours are: base, spa
+CONTAINER_FLAVOURS="base"
 
 ###
 ###
@@ -22,13 +22,11 @@ echo "Getting latest version from GitHub..."
 git pull
 echo "System will build $CONTAINER_FLAVOURS"
 
-DIR="./tests"
-
 for F in $CONTAINER_FLAVOURS; do
     TARGET="scipion-$F"
     echo "Compiling $TARGET image..."
-    echo "Result will be in $DIR/$TARGET.sif"
-    apptainer build --force $DIR/$TARGET.sif ./apptainer/$TARGET.def
+    echo "Result will be in $TARGET.sif"
+    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force $TARGET.sif /home/lsanchez/Desktop/scipion_containers/scipion-containers/apptainer/$TARGET.def
 done
 
 echo "Finished."

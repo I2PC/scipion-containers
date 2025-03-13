@@ -4,13 +4,10 @@ From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 %labels
   Maintainer1 miceta@cnb.csic.es
   Maintainer2 md.sanchez@cnb.csic.es
-  Version 24.02.1
+  Version 25.03.01
 
 %help
   Base recipe for Scipion on Apptainer/Singularity image generation.
-
-%files
-./slurm.conf /etc/slurm/slurm.conf
 
 %post
 # Ezport tz for apt so it does not block on install
@@ -19,35 +16,34 @@ export DEBIAN_FRONTEND=noninteractive
 # Add cuda lib to path
 export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
-# Lets you know if cuda is OK
-which nvcc
-ls -l /dev/nvidia*
-
 # Dependencies
 apt update
 # Utilities
-apt install -y --no-install-recommends --no-install-suggests curl git less nano wget vim python3-numpy python3-dev awk
+apt install -y --no-install-recommends --no-install-suggests curl git less nano gedit vim wget python3-numpy python3-dev gawk bison flex unzip
 # Compilation
 apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk rsync
 # Xmipp + Scipion libraries
 apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
 # Slurm libraries
-apt install -y --no-install-recommends --no-install-suggests build-essential fakeroot devscripts equivs libjwt-dev libgtk2.0-dev libhwloc-dev libbpf-dev libdbus-1-dev
+apt install -y --no-install-recommends --no-install-suggests libmunge-dev libmunge2 munge
+#apt install -y --no-install-recommends --no-install-suggests unzip build-essential fakeroot devscripts equivs libjwt-dev libgtk2.0-dev libhwloc-dev libbpf-dev libdbus-1-dev libmunge-dev libmunge2 munge libyaml-0-2 libyaml-dev libjson-c-dev libhttp-parser-dev python-is-python3
+# ChimeraX libraries
+apt-get install -y xcb libffi-dev libxcb1-dev libxkbfile-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
 
-# Slurm download
-SLURM=slurm-24.11.1.tar.bz2
-wget https://download.schedmd.com/slurm/slurm-24.11.1.tar.bz2
-tar -xaf slurm-24.11.1.tar.bz2 -C /slurm
-rm slurm-24.11.1.tar.bz2
-# Slurm base installation
-cd /slurm
-mk-build-deps -i debian/control
-debuild -b -uc -us
+# Create a user for SLURM
+adduser slurm
 
-# Slurm resources configuration
-echo "AutoDetect=nvidia" > /etc/slurm/gres.conf
-sed -i '' 's/CPUs=1/CPUs=$(nproc)/g' /etc/slurm/slurm.conf
-sed -i '' "/^Nodename=/s/$/ RealMemory=$(free -m | awk '/Mem:/ {print $2}')" /etc/slurm/slurm.conf
+# Xmipp cmake
+wget https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz
+tar -zxvf cmake-3.31.6-linux-x86_64.tar.gz
+cd cmake-3.31.6-linux-x86_64
+cp -rf ./bin /usr/local/
+cp -rf ./doc /usr/local/
+cp -rf ./share /usr/local/
+cp -rf ./man/* /usr/local/share/man/
+export PATH=/usr/local/bin:$PATH
+export CMAKE_ROOT=/usr/local/share/cmake-3.31
+cd
 
 # Miniforge installation
 wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
@@ -66,14 +62,24 @@ conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
-echo "MPI_BINDIR=/usr/bin\n" >> /scipion/config/scipion.conf
-echo "MPI_LIBDIR=/usr/lib/x86_64-linux-gnu/openmpi/lib\n" >> /scipion/config/scipion.conf
-echo "MPI_INCLUDE=/usr/lib/x86_64-linux-gnu/openmpi/include\n" >> /scipion/config/scipion.conf
 echo "CUDA = True\n" >> /scipion/config/scipion.conf
 echo "OPENCV = False\n" >> /scipion/config/scipion.conf
+# Fix for ScipionUserData folder problems
+sed -i '/^SCIPION_LOG/d' /scipion/config/scipion.conf
+sed -i '/^SCIPION_LOGS/d' /scipion/config/scipion.conf
+sed -i '/^SCIPION_USER_DATA/d' /scipion/config/scipion.conf
+echo "SCIPION_LOG = ${SCIPION_USER_DATA}/logs/scipion.log" >> /scipion/config/scipion.conf
+echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 
-# Xmipp base
-/scipion/scipion3 installp -p scipion-em-xmipp -j 16
+# Scipion font fix
+/scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_*"
+
+# Basic programs: Xmipp and ChimeraX for visualisation#
+/scipion/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+/scipion/scipion3 installb deepLearningToolkit
+
+ln -s /usr/lib/x86_64-linux-gnu/libffi.so /usr/lib/x86_64-linux-gnu/libffi.so.6
+/scipion/scipion3 installp -p scipion-em-chimera
 
 # Cleaning tasks for space optimisation
 apt clean
