@@ -94,8 +94,7 @@ SCIPSLURM_LIBS=" --bind $SCIPSLURM_LIB --bind $SCIPSLURM_PLUGINS "
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
-apptainer pull oras://rinchen.cnb.csic.es/apptainer/scipion-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
-CONTAINER=/home/lsanchez/Desktop/scipion_containers/scipion-containers/tests/scipion-base.sif
+CONTAINER="oras://rinchen.cnb.csic.es/scipion/apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION"
 LAUNCH_CMD="apptainer exec --nv --containall \
             --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
             --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
