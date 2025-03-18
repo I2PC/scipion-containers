@@ -33,18 +33,6 @@ apt-get install -y xcb libffi-dev libxcb1-dev libxkbfile-dev qtbase5-dev libglu1
 # Create a user for SLURM
 adduser slurm
 
-# Xmipp cmake
-wget https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz
-tar -zxvf cmake-3.31.6-linux-x86_64.tar.gz
-cd cmake-3.31.6-linux-x86_64
-cp -rf ./bin /usr/local/
-cp -rf ./doc /usr/local/
-cp -rf ./share /usr/local/
-cp -rf ./man/* /usr/local/share/man/
-export PATH=/usr/local/bin:$PATH
-export CMAKE_ROOT=/usr/local/share/cmake-3.31
-cd
-
 # Miniforge installation
 wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
 bash miniforge.sh -b -p /opt/miniforge3
