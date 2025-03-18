@@ -1,0 +1,79 @@
+Bootstrap:docker
+From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+%labels
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 md.sanchez@cnb.csic.es
+  Version 25.03.01
+
+%help
+  Base recipe for Scipion on Apptainer/Singularity image generation.
+
+%post
+# Ezport tz for apt so it does not block on install
+export TZ=UTC
+export DEBIAN_FRONTEND=noninteractive
+# Add cuda lib to path
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+
+# Dependencies
+apt update
+# Utilities
+apt install -y --no-install-recommends --no-install-suggests curl git less nano gedit vim wget python3-numpy python3-dev gawk bison flex unzip
+# Compilation
+apt install -y --no-install-recommends --no-install-suggests gcc-10 g++-10 make cmake scons default-jdk rsync
+# Xmipp + Scipion libraries
+apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
+# Slurm libraries
+apt install -y --no-install-recommends --no-install-suggests libmunge-dev libmunge2 munge
+#apt install -y --no-install-recommends --no-install-suggests unzip build-essential fakeroot devscripts equivs libjwt-dev libgtk2.0-dev libhwloc-dev libbpf-dev libdbus-1-dev libmunge-dev libmunge2 munge libyaml-0-2 libyaml-dev libjson-c-dev libhttp-parser-dev python-is-python3
+# ChimeraX libraries
+apt-get install -y xcb libffi-dev libxcb1-dev libxkbfile-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
+
+# Create a user for SLURM
+adduser slurm
+
+# Miniforge installation
+wget -q "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O miniforge.sh
+bash miniforge.sh -b -p /opt/miniforge3
+rm miniforge.sh
+ln -s /opt/miniforge3/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+echo ". /opt/miniforge3/etc/profile.d/conda.sh" >> $SINGULARITY_ENVIRONMENT
+echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
+. /opt/miniforge3/etc/profile.d/conda.sh
+export PATH="/opt/miniforge3/bin:${PATH}"
+
+# Scipion installation
+conda run -n base pip3 install --user scipion-installer scons numpy
+conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
+
+# Scipion configuration
+printf "\n\n" | /scipion/scipion3 config --overwrite;
+sleep 5
+echo "CUDA = True\n" >> /scipion/config/scipion.conf
+echo "OPENCV = False\n" >> /scipion/config/scipion.conf
+# Fix for ScipionUserData folder problems
+sed -i '/^SCIPION_LOG/d' /scipion/config/scipion.conf
+sed -i '/^SCIPION_LOGS/d' /scipion/config/scipion.conf
+sed -i '/^SCIPION_USER_DATA/d' /scipion/config/scipion.conf
+echo "SCIPION_LOG = ${SCIPION_USER_DATA}/logs/scipion.log" >> /scipion/config/scipion.conf
+echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
+
+# Scipion font fix
+/scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_*"
+
+# Basic programs: Xmipp and ChimeraX for visualisation#
+/scipion/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+/scipion/scipion3 installb deepLearningToolkit
+
+ln -s /usr/lib/x86_64-linux-gnu/libffi.so /usr/lib/x86_64-linux-gnu/libffi.so.6
+/scipion/scipion3 installp -p scipion-em-chimera
+
+# Cleaning tasks for space optimisation
+apt clean
+apt autoclean
+apt autoremove
+rm -rf /var/lib/apt/lists/*
+unset DEBIAN_FRONTEND
+
+%runscript
