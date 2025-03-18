@@ -10,50 +10,80 @@
 ###
 ###
 
+### CONTAINER VERSION AND FLAVOUR
 # You can check all existing versions of the images in our GitHub page. latest is recommended.
-CONTAINER_VERSION="test-250120"
+CONTAINER_VERSION="latest"
 # Available flavours are: base, spa, tomo, full
-CONTAINER_FLAVOUR="base"
+CONTAINER_FLAVOUR="spa"
+### END
 
-# You will need to fill in CryoAssess form in order to get your personal copy of the models
-# CRYOASSESS_MODELS_DIR=/route/to/cryoasses_model_folder
+### CLUSTER SPECIFIC
+# You can add your cluster-specific commands here
+#PREPARE_ENV="module load XXX"
+PREPARE_SCREEN="xhost +"
+CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
+$CLUSTER_PREP
+
+### CRYOSPARC
 # CS will work only if the container has direct access to the cryosparcm binary
 # Point the container to the folder that contains the cryosparc_master folder
-CRYOSPARC_HOME_DIR=/usr/local/cryosparc3
-CRYOSPARC_PROJECTS_DIR=/data/lsanchez/ScipionUserData/CS_projects
-export CRYOSPARC_ACCOUNT="miceta@cnb.csic.es"
-export CRYOSPARC_PASSWORD="1q2w3e4r"
+#CRYOSPARC_HOME_DIR=/usr/local/cryosparc3
+#CRYOSPARC_PROJECTS_DIR=/data/lsanchez/ScipionUserData/CS_projects
+#export CRYOSPARC_ACCOUNT="miceta@cnb.csic.es"
+#export CRYOSPARC_PASSWORD="1q2w3e4r"
 
+# UNCOMMENT THIS LINE WHEN USING CRYOSPARC
+#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME_DIR --bind $CRYOSPARC_PROJECTS_DIR"
+### CRYOSPARC END
+
+### CRYOASSESS
 # Point to your CryoAssess models folder 
 #$SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
-#$SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
 
+# UNCOMMENT THIS LINE WHEN USING CRYOASSESS
+#$SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
+### CRYOASSESS END
+
+### PHENIX
 # Point to your PHENIX installation, as Scipion will not download the binaries
 #$SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
+
+# UNCOMMENT THIS LINE WHEN USING PHENIX
 #$SCIPPHENIX_CMD=" --bind $SCIPPHENIX_FOLDER --env $PHENIX_HOME=$SCIPPHENIX_FOLDER "
+### PHENIX END
 
-
+### STORAGE DIRECTORIES
 # The datadir will be used to input the RAW data used for processing, ie movies/tiltseries
-SCIPION_DATADIR=/data/lsanchez
+SCIPION_DATADIR=/path/to/your/data/folder
 # The projdir will house Scipion's project and all of its intermediate data
-SCIPION_PROJDIR=/data/lsanchez/ScipionUserData
+SCIPION_PROJDIR=/path/to/your/ScipionUserData
+### END STORAGE
 
 
-### SLURM configuration variables
-# 
-# Uncomment this and modify the variables to point to your actual SLURM installation 
-SCIPSLURM_HOSTSCONF=/home/lsanchez/Desktop/scipion_containers/scipion-containers/tests/hosts.conf
+### SLURM
+# Modify the variables to point to your actual SLURM installation 
+# Or just ignore if not using SLURM
+SCIPSLURM_HOSTSCONF=/path/to/your/hosts.conf
 SCIPSLURM_BIN="/usr/bin"
 SCIPSLURM_BASE=/etc/slurm-llnl
 SCIPSLURM_LIB=/var/lib/slurm-llnl
 SCIPSLURM_PLUGINS=/usr/lib/x86_64-linux-gnu/slurm-wlm/
-# DONT TOUCH THIS!!
+# Usual locations (check your specific case)
+# BIN -> /usr/bin, /opt/slurm/bin, /bin
+# BASE -> /etc/slurm-llnl, /etc/slurm
+# LIB -> /var/lib/slurm-llnl (ubuntu apt), /var/lib/slurm (ubuntu sources), /usr/lib64/slurm
+# PLUGINS -> /usr/lib/x86_64-linux-gnu/slurm-wlm/ (ubuntu apt), /usr/lib64/slurm (CentOS)
+###
+# DONT TOUCH THESE
 SCIPSLURM_JOBS=" --bind $SCIPSLURM_BIN/sbatch --bind $SCIPSLURM_BIN/srun --bind $SCIPSLURM_BIN/scancel --bind $SCIPSLURM_BIN/salloc "
-SCIPSLURM_CTRL=" --bind $SCIPSLURM_BIN/squeue --bind $SCIPSLURM_BIN/sinfo --bind $SCIPSLURM_BIN/scontrol --bind $SCIPSLURM_BIN/sstat --bind $SCIPSLURM_BIN/sacct "
+SCIPSLURM_CTRL=" --bind $SCIPSLURM_BIN/squeue --bind $SCIPSLURM_BIN/sinfo \
+                 --bind $SCIPSLURM_BIN/scontrol --bind $SCIPSLURM_BIN/sstat --bind $SCIPSLURM_BIN/sacct "
 SCIPSLURM_CONF=" --bind $SCIPSLURM_BASE --bind $SCIPSLURM_HOSTSCONF:/scipion/config/hosts.conf "
 SCIPSLURM_LIBS=" --bind $SCIPSLURM_LIB --bind $SCIPSLURM_PLUGINS "
-SCIPSLURM_APPTAINER=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM_LIBS "
-#
+# UNCOMMENT THIS LINE WHEN USING SLURM
+#SCIPSLURM_APPTAINER=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM_LIBS "
+###
+
 # END OF SLURM CONFIGURATION VARIABLES
 ###
 
@@ -62,13 +92,16 @@ SCIPSLURM_APPTAINER=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM
 #### END OF USER CONFIGURABLE VARIABLES
 
 # Do not touch below here unless you know what you are doing!
-
 echo "Preparing to launch Scipion Container"
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
-#apptainer pull oras://rinchen.cnb.csic.es/apptainer/scipion-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
-
+apptainer pull oras://rinchen.cnb.csic.es/apptainer/scipion-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
 CONTAINER=/home/lsanchez/Desktop/scipion_containers/scipion-containers/tests/scipion-base.sif
-LAUNCH_CMD="apptainer exec --nv --containall --env DISPLAY=$DISPLAY --bind $CRYOSPARC_HOME_DIR --env SCIPION_USER_DATA=$SCIPION_PROJDIR --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_APPTAINER $CONTAINER"
+LAUNCH_CMD="apptainer exec --nv --containall \
+            --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+            --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
+            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD \
+            $SCIPSLURM_APPTAINER $CONTAINER"
 
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
@@ -78,4 +111,3 @@ else
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
     $LAUNCH_CMD /scipion/scipion3
 fi
-

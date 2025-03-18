@@ -11,7 +11,17 @@
 ###
 
 # Available flavours are: base, spa
-CONTAINER_FLAVOURS="base"
+# You can build multiple containers by adding them separated by a space
+# For example, CONTAINER_FLAVOURS="base spa"
+# Remember that you will need base for any container
+CONTAINER_FLAVOURS="base spa"
+
+### CLUSTER SPECIFIC
+# You can add your cluster-specific commands here
+#PREPARE_ENV="module load XXX"
+PREPARE_SCREEN="xhost +"
+CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
+$CLUSTER_PREP
 
 ###
 ###
@@ -23,10 +33,10 @@ git pull
 echo "System will build $CONTAINER_FLAVOURS"
 
 for F in $CONTAINER_FLAVOURS; do
-    TARGET="scipion-$F"
+    TARGET="apptainer-$F"
     echo "Compiling $TARGET image..."
-    echo "Result will be in $TARGET.sif"
-    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force $TARGET.sif /home/lsanchez/Desktop/scipion_containers/scipion-containers/apptainer/$TARGET.def
+    echo "Result will be in ./build/$TARGET.sif"
+    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force ./build/$TARGET.sif ./apptainer/$TARGET.def
 done
 
 echo "Finished."
