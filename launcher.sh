@@ -33,11 +33,11 @@ $CLUSTER_PREP
 # Point the container to the folder that contains the cryosparc_master folder
 export CRYOSPARC_HOME=/route/to/cryosparc_folder
 export CRYOSPARC_PROJECTS_DIR=/route/to/cs_projects
-export CRYOSPARC_ACCOUNT="email@something.com"
+export CRYOSPARC_USER="email@something.com"
 export CRYOSPARC_PASSWORD="password"
 
 # UNCOMMENT THIS LINE WHEN USING CRYOSPARC
-#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME --bind $CRYOSPARC_PROJECTS_DIR"
+#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME --bind $CRYOSPARC_PROJECTS_DIR --env CRYOSPARC_HOME=$CRYOSPARC_HOME --env CRYOSPARC_USER=$CRYOSPARC_USER --env CRYOSPARC_PASSWORD=$CRYOSPARC_PASSWORD "
 ### CRYOSPARC END
 ### END #######################################################################
 
