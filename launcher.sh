@@ -31,13 +31,13 @@ $CLUSTER_PREP
 ### CRYOSPARC
 # CS will work only if the container has direct access to the cryosparcm binary
 # Point the container to the folder that contains the cryosparc_master folder
-CRYOSPARC_HOME_DIR=/usr/local/cryosparc3
-CRYOSPARC_PROJECTS_DIR=/data/lsanchez/ScipionUserData/CS_projects
-export CRYOSPARC_ACCOUNT="miceta@cnb.csic.es"
-export CRYOSPARC_PASSWORD="1q2w3e4r"
+export CRYOSPARC_HOME=/route/to/cryosparc_folder
+export CRYOSPARC_PROJECTS_DIR=/route/to/cs_projects
+export CRYOSPARC_ACCOUNT="email@something.com"
+export CRYOSPARC_PASSWORD="password"
 
 # UNCOMMENT THIS LINE WHEN USING CRYOSPARC
-#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME_DIR --bind $CRYOSPARC_PROJECTS_DIR"
+#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME --bind $CRYOSPARC_PROJECTS_DIR"
 ### CRYOSPARC END
 ### END #######################################################################
 
