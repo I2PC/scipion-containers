@@ -24,15 +24,8 @@ From: scipion-base.sif
     # Dependencies
     apt-get update
     # needed libraries
-    # chimera
-    apt-get install -y xcb libxcb1-dev libxkbfile-dev qt6-base-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
     # pdflatex
     apt-get install -y texlive-latex-extra
-
-    # Installing ChimeraX
-    git clone -b mit_chimerax_containers https://github.com/scipion-em/scipion-em-chimera /scipion/scipion-em-chimera
-    ln -s /usr/lib/x86_64-linux-gnu/libffi.so.8 /usr/lib/x86_64-linux-gnu/libffi.so.6
-    /scipion/scipion3 installp -p /scipion/scipion-em-chimera --devel
 
     # deepLearningToolkit
     export CONDA_OVERRIDE_CUDA=11.8
