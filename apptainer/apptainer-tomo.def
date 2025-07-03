@@ -2,21 +2,35 @@ BootStrap: localimage
 From: scipion-base.def
 
 %labels
-  Maintainer miceta@cnb.csic.es
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 md.sanchez@cnb.csic.es
   version 24.02.1
 
 %help
   Tomography package add-on for Apptainer/Singularity base image
 
-%files
-/scipion
-/opt
-
 %post
-/scipion/scipion3 installp -p scipion-em-tomo
+export DEBIAN_FRONTEND=noninteractive
+
+# Dependencies
+apt-get update
+# needed libraries
+apt-get install -y --no-install-recommends --no-install-suggests file
+
+# echo "FIDDER_CUDA_LIB = /usr/local/cuda-11.8/lib64" >> /scipion/config/scipion.conf
+
+/scipion/scipion3 installp -p scipion-em-tomo            
 /scipion/scipion3 installp -p scipion-em-xmipptomo
-/scipion/scipion3 installp -p scipion-em-tomotwin
-/scipion/scipion3 installp -p scipion-em-tomoviz
-/scipion/scipion3 installp -p scipion-em-sphire
+/scipion/scipion3 installp -p scipion-em-aretomo     
+/scipion/scipion3 installp -p scipion-em-fidder      
+/scipion/scipion3 installp -p scipion-em-imod         
+/scipion/scipion3 installp -p scipion-em-motioncorr
+/scipion/scipion3 installp -p scipion-em-tomo3d      
 
-
+# /scipion/scipion3 installp -p scipion-em-dynamo
+# /scipion/scipion3 installp -p scipion-em-eman2
+# /scipion/scipion3 installp -p scipion-em-emantomo
+# /scipion/scipion3 installp -p scipion-em-isonet
+# /scipion/scipion3 installp -p scipion-em-tomoviz
+# /scipion/scipion3 installp -p scipion-em-sphire
+# /scipion/scipion3 installp -p scipion-em-warp
