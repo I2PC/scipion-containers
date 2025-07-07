@@ -1,5 +1,5 @@
 BootStrap: localimage
-From: scipion-base.def
+From: apptainer-base.sif
 
 %labels
   Maintainer1 miceta@cnb.csic.es
