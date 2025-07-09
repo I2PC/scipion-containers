@@ -52,6 +52,17 @@ $SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
 ### END #######################################################################
 
 
+### FIDDER
+export XDG_CACHE_HOME="/scipion/fidder_cache"
+# Path where fidder weights will be downloaded in your host machine (i.e. path/to/scipion/fidder_cache):
+FIDDER_HOST="path/to/scipion/fidder_cache"
+
+# UNCOMMENT THIS LINE WHEN USING FIDDER
+FIDDER_CMD=" --bind $FIDDER_HOST:$XDG_CACHE_HOME --env XDG_CACHE_HOME=$XDG_CACHE_HOME"
+### CRYOSPARC END
+### END #######################################################################
+
+
 ### PHENIX
 # Point to your PHENIX installation, as Scipion will not download the binaries
 $SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
@@ -128,7 +139,7 @@ LAUNCH_CMD="apptainer exec --nv --containall \
             --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
             --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD \
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $FIDDER_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD \
             $CONTAINER_LOCATION/$CONTAINER.sif"
 
 if [ "$#" -gt 0 ]; then
