@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: /home/irene/PycharmProjects/scipion-containers/build/apptainer-base:latest.sif
+From: apptainer-base_latest.sif
 
 %labels
   Maintainer1 miceta@cnb.csic.es
@@ -19,16 +19,8 @@ From: /home/irene/PycharmProjects/scipion-containers/build/apptainer-base:latest
     # needed libraries
     # pdflatex
     apt-get install -y texlive-latex-extra
-
-    # deepLearningToolkit
-    # remove the following lines when the scipion-em-xmipp installed in base image is >= 3.25.06.0 (Rhea)
-    /scipion/scipion3 uninstallp -p scipion-em-xmipp
-    cd /scipion
-    git clone https://github.com/I2PC/xmipp.git xmipp-bundle && cd xmipp-bundle
-    /scipion/scipion3 run ./xmipp
-    /scipion/scipion3 installp -p /scipion/xmipp-bundle/src/scipion-em-xmipp --devel -j $(nproc)
-    /scipion/scipion3 installp -p /scipion/xmipp-bundle/src/scipion-em-xmipp --devel -j $(nproc)
-    /scipion/scipion3 installb deepLearningToolkit
+    # Xvfb as virtual display
+    apt-get install -y xvfb
 
     git clone https://gitlab.com/jordibc/scipion-em-ucm.git /scipion/scipion-em-ucm
     /scipion/scipion3 installp -p /scipion/scipion-em-ucm --devel
