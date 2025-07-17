@@ -1,25 +1,18 @@
 Bootstrap: localimage
-From: scipion-VRS-level0.sif
+From: apptainer-vrs-level0_latest.sif
 
 %labels
   Maintainer1 miceta@cnb.csic.es
   Maintainer2 md.sanchez@cnb.csic.es
   Maintainer3 isanchez@cnb.csic.es
- # version 24.02.1
+ # version 25.03.1
 
 %help
   VRS level 1 package add-on for Apptainer/Singularity VRS level 0 image
 
 %post
-    # Export tz for apt so it does not block on install
-    export TZ=UTC
+    set +e
     export DEBIAN_FRONTEND=noninteractive
-    # Add cuda lib to path
-    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
-
-    # Lets you know if cuda is OK
-    which nvcc
-    ls -l /dev/nvidia*
 
     # Dependencies
     apt update
@@ -36,12 +29,3 @@ From: scipion-VRS-level0.sif
     rm -rf /scipion/scipion-em-validation
     git clone -b apptainer https://github.com/I2PC/scipion-em-validation /scipion/scipion-em-validation
     /scipion/scipion3 pip install -r /scipion/scipion-em-validation/requirements.txt
-
-    # Cleaning tasks for space optimisation
-    apt clean
-    apt autoclean
-    apt autoremove
-    rm -rf /var/lib/apt/lists/*
-    unset DEBIAN_FRONTEND
-
-%runscript
