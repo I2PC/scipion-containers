@@ -16,13 +16,18 @@ From: apptainer-vrs-level1_latest.sif
 
     # Dependencies
     apt update
+    # imagemagick for emringer
+    apt-get install -y imagemagick
 
     git clone https://github.com/scipion-em/scipion-em-phenix.git /scipion/scipion-em-phenix
+    /scipion/scipion3 installp -p /scipion/scipion-em-phenix --devel
+    sed -i 's/mv/cp/g' /scipion/software/em/maxit-v10.100-prod-src/cifparse-obj-v7.0/Makefile
     /scipion/scipion3 installp -p /scipion/scipion-em-phenix --devel
 
     git clone https://github.com/scipion-em/scipion-em-mapq.git /scipion/scipion-em-mapq
     /scipion/scipion3 installp -p /scipion/scipion-em-mapq --devel
 
+    # TO-DO: DAQ is not working and it will not until this PR is solved https://github.com/scipion-em/scipion-em-kiharalab/pull/60
     git clone https://github.com/scipion-em/scipion-em-kiharalab.git /scipion/scipion-em-kiharalab
     /scipion/scipion3 installp -p /scipion/scipion-em-kiharalab --devel
 
