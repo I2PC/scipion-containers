@@ -57,7 +57,7 @@ $SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
 SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
 
 # UNCOMMENT THIS LINE WHEN USING PHENIX
-#$SCIPPHENIX_CMD=" --bind $SCIPPHENIX_FOLDER --env PHENIX_HOME=$SCIPPHENIX_FOLDER "
+#SCIPPHENIX_CMD=" --bind $SCIPPHENIX_FOLDER --env PHENIX_HOME=$SCIPPHENIX_FOLDER "
 ### PHENIX END
 ### END #######################################################################
 
