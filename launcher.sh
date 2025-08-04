@@ -123,7 +123,7 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 echo "Preparing to launch Scipion Container"
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
 CONTAINER=apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
-apptainer pull oras://rinchen.cnb.csic.es/scipion/$CONTAINER -F $CONTAINER_LOCATION
+apptainer pull $CONTAINER_LOCATION/$CONTAINER.sif oras://rinchen.cnb.csic.es/scipion/$CONTAINER
 LAUNCH_CMD="apptainer exec --nv --containall \
             --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
             --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
