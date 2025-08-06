@@ -1,5 +1,6 @@
 # scipion-containers
-<img src="./icon_box.png" alt="scipion-containers icon" width="80" />
+<img src="./icon_box.png" alt="scipion-containers icon" width="300" />
+
 ## Introduction
 
 In this repository you will find a set of recipes and instructions to build and use containerized Scipion+Xmipp images with **Apptainer/Singularity**, offering a hassle-free experience for CryoEM/ET processing.
@@ -17,9 +18,7 @@ To use the containerized version of Scipion provided in this repository, you mus
 - Apptainer is available for most Linux distributions and can usually be installed through the system package manager (e.g., on Ubuntu/Debian run `sudo apt install apptainer`).
 - If it's not available via your package manager, follow the official instructions here: [Apptainer Installation Guide](https://apptainer.org/docs/).
 
-To verify that Apptainer is correctly installed and accessible, run:
-
-`apptainer -- version`
+To verify that Apptainer is correctly installed and accessible, run: `apptainer --version`
 
 If you want to learn more about using Apptainer and working with container images like ours, please visit the official [Apptainer documentation](https://apptainer.org/docs/user/main/quick_start.html).
 
@@ -46,7 +45,7 @@ The easiest and recommended way to use the Scipion containers is by running the 
 Two environment variables determine which image will be used:
 
 - `CONTAINER_FLAVOUR`: the name of the image (e.g. `scipion-base`, `scipion-tomo`)
-- `CONTAINER_VERSION`: the tag (e.g. `latest`, `20250318`, etc.). We recommend setting the this variable to ´latest´ to always use the most up-to-date container image
+- `CONTAINER_VERSION`: the tag (e.g. `latest`, `20250318`, etc.). We recommend setting the this variable to `latest` to always use the most up-to-date container image
 
 When launched, it will automatically download the corresponding image from our OCI registry (`rinchen.cnb.csic.es`) if the image is not available locally.  
 If the image has been downloaded before, it will be reused — avoiding duplication and saving disk space.
@@ -54,11 +53,11 @@ If the image has been downloaded before, it will be reused — avoiding duplicat
 *Note: The launcher supports additional environment variables for further customization. Be sure to review it to adapt the configuration to your use case.*
 
 ### 2. Compiling and modifying your own images
-All our recipes are included in the ´apptainer´ and ´docker´ subfolders of this GitHub project.
+All our recipes are included in the `apptainer` subfolder of this GitHub project.
 
 All our recipes (`*.def`) are available in the `apptainer` subfolder of this repository.  
 If you prefer or need to build the images yourself — for example, to include custom plugins  — you can use the provided `build.sh` script to simplify the process.
 
 This script allows you to define which container flavours you want to build by editing the `CONTAINER_FLAVOURS` variable. You must always include base, as it is the foundation for the rest of the flavours.
 
-*Note: Before running ´build.sh´, we recommend reviewing the script so you can customize variables like ´CONTAINER_FLAVOURS´ to fit your needs.*
+*Note: Before running `build.sh`, we recommend reviewing the script so you can customize variables like `CONTAINER_FLAVOURS` to fit your needs.*
