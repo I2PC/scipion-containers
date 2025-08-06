@@ -17,8 +17,6 @@ apt-get update
 # needed libraries
 apt-get install -y --no-install-recommends --no-install-suggests file
 
-# echo "FIDDER_CUDA_LIB = /usr/local/cuda-11.8/lib64" >> /scipion/config/scipion.conf
-
 /scipion/scipion3 installp -p scipion-em-tomo            
 /scipion/scipion3 installp -p scipion-em-xmipptomo
 /scipion/scipion3 installp -p scipion-em-aretomo     
