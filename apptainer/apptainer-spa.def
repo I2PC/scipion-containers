@@ -21,7 +21,6 @@ apt-get install -y --no-install-recommends --no-install-suggests build-essential
 
 # /scipion/scipion3 installp -p scipion-em-continuousflex 
 # /scipion/scipion3 installp -p scipion-em-empiar
-# /scipion/scipion3 installp -p scipion-em-flexutils
 # /scipion/scipion3 installp -p scipion-em-phenix
 # /scipion/scipion3 installp -p scipion-em-prody
 # /scipion/scipion3 installp -p scipion-em-topaz
@@ -34,6 +33,7 @@ apt-get install -y --no-install-recommends --no-install-suggests build-essential
 /scipion/scipion3 installp -p scipion-em-cryosparc2
 /scipion/scipion3 installp -p scipion-em-eman2
 /scipion/scipion3 installp -p scipion-em-facilities
+/scipion/scipion3 installp -p scipion-em-flexutils
 /scipion/scipion3 installp -p scipion-em-fsc3d
 /scipion/scipion3 installp -p scipion-em-gautomatch
 /scipion/scipion3 installp -p scipion-em-gctf
@@ -48,4 +48,3 @@ apt-get install -y --no-install-recommends --no-install-suggests build-essential
 /scipion/scipion3 installp -p scipion-em-spider
 /scipion/scipion3 installp -p scipion-em-spoc
 /scipion/scipion3 installp -p scipion-em-warp
-
