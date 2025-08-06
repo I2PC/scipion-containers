@@ -1,14 +1,14 @@
 Bootstrap: localimage
-From: apptainer-vrs-level1_latest.sif
+From: apptainer-vrs-level1.sif
 
 %labels
   Maintainer1 miceta@cnb.csic.es
   Maintainer2 md.sanchez@cnb.csic.es
   Maintainer3 isanchez@cnb.csic.es
- # version 25.03.1
+ # version 25.08.04
 
 %help
-  VRS level A package add-on for Apptainer/Singularity VRS level A image
+  VRS level A package add-on for Apptainer/Singularity VRS level 1 image
 
 %post
     set +e
