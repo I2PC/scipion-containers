@@ -18,14 +18,14 @@ There are many ways to use containerised versions of Scipion and Xmipp. There ar
 #### What are the available packages?
 You can check it out in the [versions chart page](./available_images.md). You can use an image and its tag to download the image. All of the images use *scipion-base* as their foundation and there is no need of downloading it when downloading "add-on" packages such as *scipion-tomo*.
 #### How to download it?
-The BioComputing Unit / Instruct I2PC has set up an OCI registry (Harbor) in images.i2pc.es. It supports ORAS downloads for Apptainer and direct downloads for Docker. For example, to download the *scipion-base* image on its tag *latest*, you could do:
+The BioComputing Unit / Instruct I2PC has set up an OCI registry (Harbor) in rinchen.cnb.csic.es. It supports ORAS downloads for Apptainer and direct downloads for Docker. For example, to download the *scipion-base* image on its tag *latest*, you could do:
 ##### Apptainer
 ```
-apptainer pull oras://images.i2pc.es/scipion/scipion-base:latest
+apptainer pull oras://rinchen.cnb.csic.es/scipion/apptainer-base:latest
 ```
 ##### Docker
 ```
-docker pull images.i2pc.es/scipion/scipion-base:latest
+docker pull rinchen.cnb.csic.es/scipion/apptainer-base:latest
 ``` 
 ### Compiling and modifying your own images
 All our recipes are included in the "apptainer" and "docker" subfolders of this GitHub project.

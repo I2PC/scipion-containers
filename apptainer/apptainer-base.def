@@ -43,6 +43,9 @@ echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
 . /opt/miniforge3/etc/profile.d/conda.sh
 export PATH="/opt/miniforge3/bin:${PATH}"
 
+# Add 'anaconda' channel to conda to access required packages during installation
+conda config --add channels anaconda
+
 # Scipion installation
 conda run -n base pip3 install --user scipion-installer scons numpy
 conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion

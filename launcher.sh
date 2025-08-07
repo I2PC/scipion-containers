@@ -11,11 +11,12 @@
 ###
 
 ### CONTAINER VERSION AND FLAVOUR
-# You can check all existing versions of the images in our GitHub page. latest is recommended.
+# You can check all existing versions of the images in our GitHub page. 
+# "latest" is always the recommended stable image.
 CONTAINER_VERSION="latest"
 # Available flavours are: base, spa, tomo, full
 CONTAINER_FLAVOUR="spa"
-### END
+### END #######################################################################
 
 ### CLUSTER SPECIFIC
 # You can add your cluster-specific commands here
@@ -23,34 +24,43 @@ CONTAINER_FLAVOUR="spa"
 PREPARE_SCREEN="xhost +"
 CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
 $CLUSTER_PREP
+# CLUSTER END
+### END #######################################################################
+
 
 ### CRYOSPARC
 # CS will work only if the container has direct access to the cryosparcm binary
 # Point the container to the folder that contains the cryosparc_master folder
-#CRYOSPARC_HOME_DIR=/usr/local/cryosparc3
-#CRYOSPARC_PROJECTS_DIR=/data/lsanchez/ScipionUserData/CS_projects
-#export CRYOSPARC_ACCOUNT="miceta@cnb.csic.es"
-#export CRYOSPARC_PASSWORD="1q2w3e4r"
+export CRYOSPARC_HOME=/route/to/cryosparc_folder
+export CRYOSPARC_PROJECTS_DIR=/route/to/cs_projects
+export CRYOSPARC_USER="email@something.com"
+export CRYOSPARC_PASSWORD="password"
 
 # UNCOMMENT THIS LINE WHEN USING CRYOSPARC
-#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME_DIR --bind $CRYOSPARC_PROJECTS_DIR"
+#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME --bind $CRYOSPARC_PROJECTS_DIR --env CRYOSPARC_HOME=$CRYOSPARC_HOME --env CRYOSPARC_USER=$CRYOSPARC_USER --env CRYOSPARC_PASSWORD=$CRYOSPARC_PASSWORD "
 ### CRYOSPARC END
+### END #######################################################################
+
 
 ### CRYOASSESS
 # Point to your CryoAssess models folder 
-#$SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
+$SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
 
 # UNCOMMENT THIS LINE WHEN USING CRYOASSESS
 #$SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
 ### CRYOASSESS END
+### END #######################################################################
+
 
 ### PHENIX
 # Point to your PHENIX installation, as Scipion will not download the binaries
-#$SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
+$SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
 
 # UNCOMMENT THIS LINE WHEN USING PHENIX
 #$SCIPPHENIX_CMD=" --bind $SCIPPHENIX_FOLDER --env $PHENIX_HOME=$SCIPPHENIX_FOLDER "
 ### PHENIX END
+### END #######################################################################
+
 
 ### STORAGE DIRECTORIES
 # The datadir will be used to input the RAW data used for processing, ie movies/tiltseries
@@ -58,6 +68,8 @@ SCIPION_DATADIR=/path/to/your/data/folder
 # The projdir will house Scipion's project and all of its intermediate data
 SCIPION_PROJDIR=/path/to/your/ScipionUserData
 ### END STORAGE
+### END #######################################################################
+
 
 
 ### SLURM
@@ -81,11 +93,27 @@ SCIPSLURM_CTRL=" --bind $SCIPSLURM_BIN/squeue --bind $SCIPSLURM_BIN/sinfo \
 SCIPSLURM_CONF=" --bind $SCIPSLURM_BASE --bind $SCIPSLURM_HOSTSCONF:/scipion/config/hosts.conf "
 SCIPSLURM_LIBS=" --bind $SCIPSLURM_LIB --bind $SCIPSLURM_PLUGINS "
 # UNCOMMENT THIS LINE WHEN USING SLURM
-#SCIPSLURM_APPTAINER=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM_LIBS "
-###
-
+#SCIPSLURM_CMD=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM_LIBS "
 # END OF SLURM CONFIGURATION VARIABLES
-###
+### END #######################################################################
+
+### Message Passing Interface (MPI)
+# Many programs (such as Relion & Xmipp) require MPI
+# Simple tasks such as extract particles will fail if this is not configured
+# LIB is usually /usr/lib/x86_64-linux-gnu/openmpi (Ubuntu-APT) or /usr/lib64/openmpi/ (CentOS-YUM)
+# Depending on your system, it might also be in /opt or even be mpich instead of openmpi
+# If in doubt, check with your nearest IT manager
+SCIPMPI_LIB=" /usr/lib/x86_64-linux-gnu/openmpi "
+SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
+# END OF MPI CONFIGURATION VARIABLES
+### END #######################################################################
+
+### Apptainer download location
+# You might be interested in downloading the container in a different location
+# Or maybe you just don't have enough space in your ~/.apptainer to download the image
+# Uncomment these variables to change the location of the container
+#export APPTAINER_CACHEDIR=/route/to/FOLDER
+#export CONTAINER_LOCATION=/route/to/FOLDER
 
 ###
 ###
@@ -94,13 +122,14 @@ SCIPSLURM_LIBS=" --bind $SCIPSLURM_LIB --bind $SCIPSLURM_PLUGINS "
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
-CONTAINER="oras://rinchen.cnb.csic.es/scipion/apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION"
+CONTAINER=apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
+apptainer pull $CONTAINER_LOCATION/$CONTAINER.sif oras://rinchen.cnb.csic.es/scipion/$CONTAINER
 LAUNCH_CMD="apptainer exec --nv --containall \
             --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
             --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD \
-            $SCIPSLURM_APPTAINER $CONTAINER"
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD \
+            $CONTAINER_LOCATION/$CONTAINER.sif"
 
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
