@@ -1,0 +1,29 @@
+Bootstrap: localimage
+From: apptainer-base.sif
+
+%labels
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 md.sanchez@cnb.csic.es
+  Maintainer3 isanchez@cnb.csic.es
+ # version 25.08.04
+
+%help
+  VRS level 0 package add-on for Apptainer/Singularity base image
+
+%post
+    set +e
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Dependencies
+    apt-get update
+    # needed libraries
+    # pdflatex
+    apt-get install -y texlive-latex-extra
+    # Xvfb as virtual display
+    apt-get install -y xvfb
+
+    git clone https://gitlab.com/jordibc/scipion-em-ucm.git /scipion/scipion-em-ucm
+    /scipion/scipion3 installp -p /scipion/scipion-em-ucm --devel
+
+    git clone -b apptainer https://github.com/I2PC/scipion-em-validation /scipion/scipion-em-validation
+    /scipion/scipion3 pip install -r /scipion/scipion-em-validation/requirements.txt
