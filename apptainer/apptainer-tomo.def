@@ -17,13 +17,13 @@ apt-get update
 # needed libraries
 apt-get install -y --no-install-recommends --no-install-suggests file
 
-/scipion/scipion3 installp -p scipion-em-tomo            
-/scipion/scipion3 installp -p scipion-em-xmipptomo
-/scipion/scipion3 installp -p scipion-em-aretomo     
-/scipion/scipion3 installp -p scipion-em-fidder      
-/scipion/scipion3 installp -p scipion-em-imod         
+/scipion/scipion3 installp -p scipion-em-aretomo
+/scipion/scipion3 installp -p scipion-em-fidder
+/scipion/scipion3 installp -p scipion-em-imod
 /scipion/scipion3 installp -p scipion-em-motioncorr
-/scipion/scipion3 installp -p scipion-em-tomo3d      
+/scipion/scipion3 installp -p scipion-em-tomo
+/scipion/scipion3 installp -p scipion-em-tomo3d    
+/scipion/scipion3 installp -p scipion-em-xmipptomo
 
 # /scipion/scipion3 installp -p scipion-em-dynamo
 # /scipion/scipion3 installp -p scipion-em-eman2
