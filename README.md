@@ -1,7 +1,6 @@
 # scipion-containers
-<img src="./icon_box.png" alt="scipion-containers icon" width="300" />
-
 ## Introduction
+<a href="#"><img src="./icon_box.png" alt="scipion-containers icon" width="300" align="left" style="margin-right: 15px; margin-bottom: 10px;"></a>
 
 In this repository you will find a set of recipes and instructions to build and use containerized Scipion+Xmipp images with **Apptainer/Singularity**, offering a hassle-free experience for CryoEM/ET processing.
 
@@ -10,6 +9,7 @@ Whether you are a cluster or system administrator for a company or institution, 
 Installing and updating Scipion is as easy as it can be. Problems do come when populating the list of installed plugins: Xmipp, Relion, Sphire... Managing such a big environment can be a hassle.
 
 That is why we offer a collection of pre-built **Apptainer/Singularity** images and recipes to simplify the process.
+
 
 ### Requirements
 
