@@ -58,7 +58,7 @@ export XDG_CACHE_HOME="/scipion/fidder_cache"
 FIDDER_HOST="path/to/scipion/fidder_cache"
 
 # UNCOMMENT THIS LINE WHEN USING FIDDER
-FIDDER_CMD=" --bind $FIDDER_HOST:$XDG_CACHE_HOME --env XDG_CACHE_HOME=$XDG_CACHE_HOME"
+# FIDDER_CMD=" --bind $FIDDER_HOST:$XDG_CACHE_HOME --env XDG_CACHE_HOME=$XDG_CACHE_HOME"
 ### CRYOSPARC END
 ### END #######################################################################
 
