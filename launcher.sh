@@ -4,6 +4,7 @@
 # Authors:
 #   Mikel Iceta @ CNB-CSIC - miceta@cnb.csic.es
 #   Lola Sánchez @ CNB-CSIC - md.sanchez@cnb.csic.es
+#   Irene Sánchez @ CNB-CSIC - isanchez@cnb.csic.es
 #
 
 #### USER CONFIGURABLE VARIABLES
@@ -128,18 +129,22 @@ echo "Preparing to launch Scipion Container"
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
 CONTAINER=apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
 apptainer pull $CONTAINER_LOCATION/$CONTAINER.sif oras://rinchen.cnb.csic.es/scipion/$CONTAINER
-LAUNCH_CMD="apptainer exec --nv --containall \
-            --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
-            --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
-            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD \
-            $CONTAINER_LOCATION/$CONTAINER.sif"
 
+# Launching command
+# GUI is not always an option in compute nodes, thus X11 does not need to be there always
+LAUNCH_CMD="apptainer exec --nv --containall \
+            --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+            --bind /run --bind /etc/resolv.conf \
+            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
+
+# Decide if Scipion is getting launched in GUI mode (master) or in headless execution mode (worker)
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
-    $LAUNCH_CMD /scipion/scipion3 run $@
+    $LAUNCH_CMD $CONTAINER_LOCATION/$CONTAINER.sif /scipion/scipion3 run $@
 else
     echo "Launching $CONTAINER_FLAVOUR in standalone mode..."
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
-    $LAUNCH_CMD /scipion/scipion3
+    GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
+    $LAUNCH_CMD $GUI_CMD $CONTAINER_LOCATION/$CONTAINER.sif /scipion/scipion3
 fi
