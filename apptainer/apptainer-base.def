@@ -4,10 +4,14 @@ From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 %labels
   Maintainer1 miceta@cnb.csic.es
   Maintainer2 md.sanchez@cnb.csic.es
-  Version 25.03.01
+  Version 25.08.11
 
 %help
   Base recipe for Scipion on Apptainer/Singularity image generation.
+
+%environment 
+  # Add cuda lib to path
+  export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
 %post
 # Ezport tz for apt so it does not block on install
@@ -15,6 +19,8 @@ export TZ=UTC
 export DEBIAN_FRONTEND=noninteractive
 # Add cuda lib to path
 export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+# Create a symbolic link so that /usr/local/cuda points to the CUDA 11.8 installation
+ln -s /usr/local/cuda-11.8 /usr/local/cuda
 
 # Dependencies
 apt update
@@ -43,14 +49,20 @@ echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
 . /opt/miniforge3/etc/profile.d/conda.sh
 export PATH="/opt/miniforge3/bin:${PATH}"
 
+# Add 'anaconda' channel to conda to access required packages during installation
+conda config --add channels anaconda
+
 # Scipion installation
 conda run -n base pip3 install --user scipion-installer scons numpy
 conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
+/scipion/scipion3 run conda install -c conda-forge libstdcxx-ng
 
 # Scipion configuration
 printf "\n\n" | /scipion/scipion3 config --overwrite;
 sleep 5
 echo "CUDA = True\n" >> /scipion/config/scipion.conf
+echo "CUDA_BIN = /usr/local/cuda-11.8/bin\n" >> /scipion/config/scipion.conf
+echo "CUDA_LIB = /usr/local/cuda-11.8/lib64\n" >> /scipion/config/scipion.conf
 echo "OPENCV = False\n" >> /scipion/config/scipion.conf
 # Fix for ScipionUserData folder problems
 sed -i '/^SCIPION_LOG/d' /scipion/config/scipion.conf

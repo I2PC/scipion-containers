@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: apptainer-vrs-level1.sif
+
+%labels
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 md.sanchez@cnb.csic.es
+  Maintainer3 isanchez@cnb.csic.es
+ # version 25.08.04
+
+%help
+  VRS level A package add-on for Apptainer/Singularity VRS level 1 image
+
+%post
+    set +e
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Dependencies
+    apt update
+    # imagemagick for emringer
+    apt-get install -y imagemagick
+
+    git clone https://github.com/scipion-em/scipion-em-phenix.git /scipion/scipion-em-phenix
+    /scipion/scipion3 installp -p /scipion/scipion-em-phenix --devel
+    sed -i 's/mv/cp/g' /scipion/software/em/maxit-v10.100-prod-src/cifparse-obj-v7.0/Makefile
+    /scipion/scipion3 installp -p /scipion/scipion-em-phenix --devel
+
+    git clone https://github.com/scipion-em/scipion-em-mapq.git /scipion/scipion-em-mapq
+    /scipion/scipion3 installp -p /scipion/scipion-em-mapq --devel
+
+    # TO-DO: DAQ is not working and it will not until this PR is solved https://github.com/scipion-em/scipion-em-kiharalab/pull/60
+    git clone https://github.com/scipion-em/scipion-em-kiharalab.git /scipion/scipion-em-kiharalab
+    /scipion/scipion3 installp -p /scipion/scipion-em-kiharalab --devel
+
+    rm -rf /scipion/scipion-em-validation
+    git clone -b apptainer https://github.com/I2PC/scipion-em-validation /scipion/scipion-em-validation
+    /scipion/scipion3 pip install -r /scipion/scipion-em-validation/requirements.txt
