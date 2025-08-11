@@ -138,13 +138,15 @@ LAUNCH_CMD="apptainer exec --nv --containall \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
             $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
 
+CONTAINER="$CONTAINER_LOCATION/$CONTAINER.sif"
+
 # Decide if Scipion is getting launched in GUI mode (master) or in headless execution mode (worker)
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
-    $LAUNCH_CMD $CONTAINER_LOCATION/$CONTAINER.sif /scipion/scipion3 run $@
+    $LAUNCH_CMD $CONTAINER /scipion/scipion3 run $@
 else
     echo "Launching $CONTAINER_FLAVOUR in standalone mode..."
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
     GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
-    $LAUNCH_CMD $GUI_CMD $CONTAINER_LOCATION/$CONTAINER.sif /scipion/scipion3
+    $LAUNCH_CMD $GUI_CMD $CONTAINER /scipion/scipion3
 fi
