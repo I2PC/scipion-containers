@@ -87,7 +87,7 @@ SCIPSLURM_PLUGINS=/usr/lib/x86_64-linux-gnu/slurm-wlm/
 # BASE -> /etc/slurm-llnl, /etc/slurm
 # LIB -> /var/lib/slurm-llnl (ubuntu apt), /var/lib/slurm (ubuntu sources), /usr/lib64/slurm
 # LIB_DEPENDENCIES -> ubuntu: /lib/x86_64-linux-gnu/libc.so.*, /lib/x86_64-linux-gnu/libm.so.*, /lib/x86_64-linux-gnu/libresolv.so.*, /lib/x86_64-linux-gnu/ld-linux-x86-64.so.* 
-                      CentOS: /lib64/libc.so.*, /lib64/libm.so.*, /lib64/libresolv.so.*, /lib64/ld-linux-x86-64.so.*
+#                     CentOS: /lib64/libc.so.*, /lib64/libm.so.*, /lib64/libresolv.so.*, /lib64/ld-linux-x86-64.so.*
 # PLUGINS -> /usr/lib/x86_64-linux-gnu/slurm-wlm/ (ubuntu apt), /usr/lib64/slurm (CentOS)
 ###
 # DONT TOUCH THESE
