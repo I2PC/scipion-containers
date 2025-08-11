@@ -22,9 +22,9 @@ CONTAINER_FLAVOUR="spa"
 ### CLUSTER SPECIFIC
 # You can add your cluster-specific commands here
 #PREPARE_ENV="module load XXX"
-PREPARE_SCREEN="xhost +"
-CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
-$CLUSTER_PREP
+$PREPARE_ENV
+PREPARE_SCREEN="xhost + "
+$PREPARE_SCREEN
 # CLUSTER END
 ### END #######################################################################
 
