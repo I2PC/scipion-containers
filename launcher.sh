@@ -4,6 +4,7 @@
 # Authors:
 #   Mikel Iceta @ CNB-CSIC - miceta@cnb.csic.es
 #   Lola Sánchez @ CNB-CSIC - md.sanchez@cnb.csic.es
+#   Irene Sánchez @ CNB-CSIC - isanchez@cnb.csic.es
 #
 
 #### USER CONFIGURABLE VARIABLES
@@ -21,9 +22,9 @@ CONTAINER_FLAVOUR="spa"
 ### CLUSTER SPECIFIC
 # You can add your cluster-specific commands here
 #PREPARE_ENV="module load XXX"
-PREPARE_SCREEN="xhost +"
-CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
-$CLUSTER_PREP
+$PREPARE_ENV
+PREPARE_SCREEN="xhost + "
+$PREPARE_SCREEN
 # CLUSTER END
 ### END #######################################################################
 
@@ -95,7 +96,7 @@ SCIPSLURM_JOBS=" --bind $SCIPSLURM_BIN/sbatch --bind $SCIPSLURM_BIN/srun --bind 
 SCIPSLURM_CTRL=" --bind $SCIPSLURM_BIN/squeue --bind $SCIPSLURM_BIN/sinfo \
                  --bind $SCIPSLURM_BIN/scontrol --bind $SCIPSLURM_BIN/sstat --bind $SCIPSLURM_BIN/sacct "
 SCIPSLURM_CONF=" --bind $SCIPSLURM_BASE --bind $SCIPSLURM_HOSTSCONF:/scipion/config/hosts.conf "
-SCIPSLURM_LIBS=" --bind $SCIPSLURM_LIB --bind $SCIPSLURM_LIB_DEPENDENCIES --bind $SCIPSLURM_PLUGINS "
+SCIPSLURM_LIBS="${SCIPSLURM_LIB:+--bind $SCIPSLURM_LIB} ${SCIPSLURM_LIB_DEPENDENCIES:+--bind $SCIPSLURM_LIB_DEPENDENCIES} ${SCIPSLURM_PLUGINS:+--bind $SCIPSLURM_PLUGINS} "
 # UNCOMMENT THIS LINE WHEN USING SLURM
 #SCIPSLURM_CMD=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM_LIBS "
 # END OF SLURM CONFIGURATION VARIABLES
@@ -128,18 +129,24 @@ echo "Preparing to launch Scipion Container"
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
 CONTAINER=apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
 apptainer pull $CONTAINER_LOCATION/$CONTAINER.sif oras://rinchen.cnb.csic.es/scipion/$CONTAINER
-LAUNCH_CMD="apptainer exec --nv --containall \
-            --env DISPLAY=$DISPLAY --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
-            --bind /run --bind /tmp/.X11-unix --bind /etc/resolv.conf \
-            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD \
-            $CONTAINER_LOCATION/$CONTAINER.sif"
 
+# Launching command
+# GUI is not always an option in compute nodes, thus X11 does not need to be there always
+LAUNCH_CMD="apptainer exec --nv --containall \
+            --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+            --bind /run --bind /etc/resolv.conf \
+            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
+
+CONTAINER="$CONTAINER_LOCATION/$CONTAINER.sif"
+
+# Decide if Scipion is getting launched in GUI mode (master) or in headless execution mode (worker)
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
-    $LAUNCH_CMD /scipion/scipion3 run $@
+    $LAUNCH_CMD $CONTAINER /scipion/scipion3 run $@
 else
     echo "Launching $CONTAINER_FLAVOUR in standalone mode..."
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
-    $LAUNCH_CMD /scipion/scipion3
+    GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
+    $LAUNCH_CMD $GUI_CMD $CONTAINER /scipion/scipion3
 fi
