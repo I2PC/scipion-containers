@@ -33,7 +33,7 @@ $PREPARE_SCREEN
 # Point the container to the chimerax folder i.e (/home/chimerax-X.X.X being X.X.X the chimera x version)
 CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
 # Update the chimera version (the X.X.X part in the line below) of the chimera location in the container 
-export CHIMERA_LOCATION="/scipion/software/em/chimerax-1.6.1"
+export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
 
 # UNCOMMENT THIS LINE WHEN USING CHIMERAX
 # CHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
