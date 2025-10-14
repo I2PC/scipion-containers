@@ -15,8 +15,7 @@ That is why we offer a collection of pre-built **Apptainer/Singularity** images 
 
 To use the containerized version of Scipion provided in this repository, you must have [Apptainer](https://apptainer.org/) (formerly known as Singularity) installed on your system.
 
-- Apptainer is available for most Linux distributions and can usually be installed through the system package manager (e.g., on Ubuntu/Debian run `sudo apt install apptainer`).
-- If it's not available via your package manager, follow the official instructions here: [Apptainer Installation Guide](https://apptainer.org/docs/).
+You can find the official instructions here: [Apptainer Installation Guide](https://apptainer.org/docs/).
 
 To verify that Apptainer is correctly installed and accessible, run: `apptainer --version`
 
