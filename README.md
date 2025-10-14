@@ -23,7 +23,14 @@ If you want to learn more about using Apptainer and working with container image
 
 ## How to use
 
-There are two ways to use Scipion and Xmipp with containers:
+To get started, first **clone this repository** to your machine:
+
+```bash
+git clone https://github.com/I2PC/scipion-containers.git
+cd scipion-containers
+```
+
+Once you have the repository locally, there are two ways to use Scipion and Xmipp with containers:
 
 1. Use the **pre-built and up-to-date Apptainer images**, downloadable from our Harbor server.
 2. Alternatively, use the **recipes provided in this repository** to build your own images locally, with full control over the environment.
@@ -39,12 +46,15 @@ You can check it out in the [versions chart page](./available_images.md). All of
 
 #### How to use these images?
 
-The easiest and recommended way to use the Scipion containers is by running the provided launcher script located at `/apptainer/launcher.sh`, which simplifies running Scipion with Apptainer.
+The easiest and recommended way to use the Scipion containers is by running the provided launcher script `launcher.sh`, which simplifies running Scipion with Apptainer.
 
-Two environment variables determine which image will be used:
+In this script, there are several important variables to determine:
 
-- `CONTAINER_FLAVOUR`: the name of the image (e.g. `scipion-base`, `scipion-tomo`)
+- `CONTAINER_FLAVOUR`: the name of the image (e.g. `base`, `spa`, `tomo`)
 - `CONTAINER_VERSION`: the tag (e.g. `latest`, `20250318`, etc.). We recommend setting the this variable to `latest` to always use the most up-to-date container image
+- `SCIPION_DATADIR`: the data path where you have your raw data
+- `SCIPION_PROJDIR`: the Scipion projects directory
+
 
 When launched, it will automatically download the corresponding image from our OCI registry (`rinchen.cnb.csic.es`) if the image is not available locally.  
 If the image has been downloaded before, it will be reused — avoiding duplication and saving disk space.
