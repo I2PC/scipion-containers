@@ -36,7 +36,7 @@ CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
 export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
 
 # UNCOMMENT THIS LINE WHEN USING CHIMERAX
-# CHIMERA_CMD=" --bind $_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
+# CHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
 ### CHIMERAX END
 ### END #######################################################################
 
