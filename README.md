@@ -23,7 +23,7 @@ If you want to learn more about using Apptainer and working with container image
 
 ## How to use
 
-To get started, first **clone this repository** to your machine:
+To get started, first go to the folder where you want to store the Scipion container setup. From there, **clone this repository** to your machine:
 
 ```bash
 git clone https://github.com/I2PC/scipion-containers.git
@@ -48,18 +48,22 @@ You can check it out in the [versions chart page](./available_images.md). All of
 
 The easiest and recommended way to use the Scipion containers is by running the provided launcher script `launcher.sh`, which simplifies running Scipion with Apptainer.
 
-In this script, there are several important variables to determine:
+In this script, there are several important variables to determine and that should be edited before running it:
 
 - `CONTAINER_FLAVOUR`: the name of the image (e.g. `base`, `spa`, `tomo`)
 - `CONTAINER_VERSION`: the tag (e.g. `latest`, `20250318`, etc.). We recommend setting the this variable to `latest` to always use the most up-to-date container image
-- `SCIPION_DATADIR`: the data path where you have your raw data
-- `SCIPION_PROJDIR`: the Scipion projects directory
+- `SCIPION_DATADIR`: the directory containing your raw data (e.g. input movies or micrographs). 
+- `SCIPION_PROJDIR`: the Scipion projects directory. This should point to a folder named ScipionUserData, which should be created beforehand (e.g. path/to/your/data/ScipionUserData).
 
+To run the launcher, simply execute the following command:
+```bash
+bash launcher.sh
+```
 
 When launched, it will automatically download the corresponding image from our OCI registry (`rinchen.cnb.csic.es`) if the image is not available locally.  
 If the image has been downloaded before, it will be reused — avoiding duplication and saving disk space.
 
-*Note: The launcher supports additional environment variables for further customization. Be sure to review it to adapt the configuration to your use case.*
+*Note: The launcher also supports additional environment variables for further customization (e.g. for integrating with Chimera, CryoSPARC, Cryoassess, or Phenix). Be sure to review and adjust them as needed before running the launcher.
 
 ### 2. Compiling and modifying your own images
 All our recipes are included in the `apptainer` subfolder of this GitHub project.
