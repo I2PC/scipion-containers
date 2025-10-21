@@ -132,7 +132,7 @@ SIF_PATH="$CONTAINER_LOCATION/$CONTAINER.sif"
 if [ -f "$SIF_PATH" ]; then
     echo "Container already exists at $SIF_PATH"
 else
-echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
+    echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
     apptainer pull "$SIF_PATH" oras://rinchen.cnb.csic.es/scipion/$CONTAINER
 
     if [ $? -eq 0 ]; then
