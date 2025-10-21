@@ -32,8 +32,8 @@ $PREPARE_SCREEN
 ### CRYOSPARC
 # CS will work only if the container has direct access to the cryosparcm binary
 # Point the container to the folder that contains the cryosparc_master folder
-export CRYOSPARC_HOME=/route/to/cryosparc_folder
-export CRYOSPARC_PROJECTS_DIR=/route/to/cs_projects
+export CRYOSPARC_HOME="/route/to/cryosparc_folder"
+export CRYOSPARC_PROJECTS_DIR="/route/to/cs_projects"
 export CRYOSPARC_USER="email@something.com"
 export CRYOSPARC_PASSWORD="password"
 
@@ -65,9 +65,9 @@ SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
 
 ### STORAGE DIRECTORIES
 # The datadir will be used to input the RAW data used for processing, ie movies/tiltseries
-SCIPION_DATADIR=/path/to/your/data/folder
+SCIPION_DATADIR="/path/to/your/data/folder"
 # The projdir will house Scipion's project and all of its intermediate data
-SCIPION_PROJDIR=/path/to/your/ScipionUserData
+SCIPION_PROJDIR="/path/to/your/ScipionUserData"
 ### END STORAGE
 ### END #######################################################################
 
@@ -76,13 +76,13 @@ SCIPION_PROJDIR=/path/to/your/ScipionUserData
 ### SLURM
 # Modify the variables to point to your actual SLURM installation 
 # Or just ignore if not using SLURM
-SCIPSLURM_HOSTSCONF=/path/to/your/hosts.conf
+SCIPSLURM_HOSTSCONF="/path/to/your/hosts.conf"
 SCIPSLURM_BIN="/usr/bin"
-SCIPSLURM_BASE=/etc/slurm-llnl
-SCIPSLURM_LIB=/var/lib/slurm-llnl
+SCIPSLURM_BASE="/etc/slurm-llnl"
+SCIPSLURM_LIB="/var/lib/slurm-llnl"
 # UNCOMMENT THIS LINE IF YOUR SCIPSLURM_LIB HAS MORE LIBRARIES APPART FROM THE SLURM ONE
 #SCIPSLURM_LIB_DEPENDENCIES="--bind /lib/x86_64-linux-gnu/libc.so.* --bind /lib/x86_64-linux-gnu/libm.so.* --bind /lib/x86_64-linux-gnu/libresolv.so.* --bind /lib/x86_64-linux-gnu/ld-linux-x86-64.so.*"
-SCIPSLURM_PLUGINS=/usr/lib/x86_64-linux-gnu/slurm-wlm/
+SCIPSLURM_PLUGINS="/usr/lib/x86_64-linux-gnu/slurm-wlm/"
 # Usual locations (check your specific case)
 # BIN -> /usr/bin, /opt/slurm/bin, /bin
 # BASE -> /etc/slurm-llnl, /etc/slurm
