@@ -54,6 +54,8 @@ In this script, there are several important variables to determine and that shou
 - `CONTAINER_VERSION`: the tag (e.g. `latest`, `20250318`, etc.). We recommend setting the this variable to `latest` to always use the most up-to-date container image
 - `SCIPION_DATADIR`: the directory containing your raw data (e.g. input movies or micrographs). 
 - `SCIPION_PROJDIR`: the Scipion projects directory. This should point to a folder named ScipionUserData, which should be created beforehand (e.g. path/to/your/data/ScipionUserData).
+- `APPTAINER_CACHEDIR`:base directory where Apptainer stores its internal cache folder (e.g., ~/containers). Apptainer will use this directory to store temporary build files and cached images.
+- `CONTAINER_LOCATION`: directory where the final container .sif image will be stored (e.g., ~/containers/images).
 
 To run the launcher, simply execute the following command:
 ```bash
