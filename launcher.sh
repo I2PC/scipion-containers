@@ -117,7 +117,7 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 # Define where Apptainer stores data:
 # - APPTAINER_CACHEDIR: base directory where Apptainer will create its internal cache folder (e.g. ~/containers)
 # - CONTAINER_LOCATION: directory where the final .sif image will be stored (e.g. ~/containers/images)
-export APPTAINER_CACHEDIR="/path/to/your/apptainer"
+export APPTAINER_CACHEDIR="/path/to/your/apptainer/cache"
 export CONTAINER_LOCATION="/path/to/your/containers"
 mkdir -p "$APPTAINER_CACHEDIR" "$CONTAINER_LOCATION"
 
@@ -127,9 +127,23 @@ mkdir -p "$APPTAINER_CACHEDIR" "$CONTAINER_LOCATION"
 
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
+CONTAINER="apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION"
+SIF_PATH="$CONTAINER_LOCATION/$CONTAINER.sif"
+if [ -f "$SIF_PATH" ]; then
+    echo "Container already exists at $SIF_PATH"
+else
 echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
-CONTAINER=apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION
-apptainer pull $CONTAINER_LOCATION/$CONTAINER.sif oras://rinchen.cnb.csic.es/scipion/$CONTAINER
+    apptainer pull "$SIF_PATH" oras://rinchen.cnb.csic.es/scipion/$CONTAINER
+
+    if [ $? -eq 0 ]; then
+        echo "Cleaning Apptainer cache to save space..."
+        apptainer cache clean --force
+    else
+        echo "Error downloading container. Aborting."
+        exit 1
+    fi
+fi
+
 
 # Launching command
 # GUI is not always an option in compute nodes, thus X11 does not need to be there always
@@ -139,15 +153,14 @@ LAUNCH_CMD="apptainer exec --nv --containall \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
             $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
 
-CONTAINER="$CONTAINER_LOCATION/$CONTAINER.sif"
 
 # Decide if Scipion is getting launched in GUI mode (master) or in headless execution mode (worker)
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
-    $LAUNCH_CMD $CONTAINER /scipion/scipion3 run $@
+    $LAUNCH_CMD $SIF_PATH /scipion/scipion3 run $@
 else
     echo "Launching $CONTAINER_FLAVOUR in standalone mode..."
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
     GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
-    $LAUNCH_CMD $GUI_CMD $CONTAINER /scipion/scipion3
+    $LAUNCH_CMD $GUI_CMD $SIF_PATH /scipion/scipion3
 fi
