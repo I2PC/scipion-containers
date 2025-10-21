@@ -113,12 +113,13 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 # END OF MPI CONFIGURATION VARIABLES
 ### END #######################################################################
 
-### Apptainer download location
-# You might be interested in downloading the container in a different location
-# Or maybe you just don't have enough space in your ~/.apptainer to download the image
-# Uncomment these variables to change the location of the container
-#export APPTAINER_CACHEDIR=/route/to/FOLDER
-#export CONTAINER_LOCATION=/route/to/FOLDER
+### Apptainer directories configuration
+# Define where Apptainer stores data:
+# - APPTAINER_CACHEDIR: base directory where Apptainer will create its internal cache folder (e.g. ~/containers)
+# - CONTAINER_LOCATION: directory where the final .sif image will be stored (e.g. ~/containers/images)
+export APPTAINER_CACHEDIR="/path/to/your/apptainer"
+export CONTAINER_LOCATION="/path/to/your/containers"
+mkdir -p "$APPTAINER_CACHEDIR" "$CONTAINER_LOCATION"
 
 ###
 ###
