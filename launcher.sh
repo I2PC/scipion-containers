@@ -68,6 +68,8 @@ SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
 SCIPION_DATADIR="/path/to/your/data/folder"
 # The projdir will house Scipion's project and all of its intermediate data
 SCIPION_PROJDIR="/path/to/your/ScipionUserData"
+# Creatings logs directory
+mkdir -p $SCIPION_PROJDIR/logs
 ### END STORAGE
 ### END #######################################################################
 
@@ -149,6 +151,7 @@ fi
 # GUI is not always an option in compute nodes, thus X11 does not need to be there always
 LAUNCH_CMD="apptainer exec --nv --containall \
             --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+            --bind $SCIPION_PROJDIR/logs:/logs \
             --bind /run --bind /etc/resolv.conf \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
             $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
