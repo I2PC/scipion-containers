@@ -119,9 +119,12 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 # Define where Apptainer stores data:
 # - APPTAINER_CACHEDIR: base directory where Apptainer will create its internal cache folder (e.g. ~/containers)
 # - CONTAINER_LOCATION: directory where the final .sif image will be stored (e.g. ~/containers/images)
+# - APPTAINER_TMPDIR: directory for temporary files created during image builds 
 export APPTAINER_CACHEDIR="/path/to/your/apptainer/cache"
 export CONTAINER_LOCATION="/path/to/your/containers"
-mkdir -p "$APPTAINER_CACHEDIR" "$CONTAINER_LOCATION"
+export APPTAINER_TMPDIR="/path/to/your/apptainer/tmp"
+# Create directories if they don’t exist
+mkdir -p "$APPTAINER_CACHEDIR" "$CONTAINER_LOCATION" "$APPTAINER_TMPDIR"
 
 ###
 ###

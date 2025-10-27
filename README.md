@@ -56,6 +56,7 @@ In this script, there are several important variables to determine and that shou
 - `SCIPION_PROJDIR`: the Scipion projects directory. This should point to a folder named ScipionUserData, which should be created beforehand (e.g. path/to/your/data/ScipionUserData).
 - `APPTAINER_CACHEDIR`:base directory where Apptainer stores its internal cache folder (e.g., ~/containers). Apptainer will use this directory to store temporary build files and cached images.
 - `CONTAINER_LOCATION`: directory where the final container .sif image will be stored (e.g., ~/containers/images).
+- `APPTAINER_TMPDIR`: directory for temporary files created during container builds (e.g. ~/containers/tmp).
 
 To run the launcher, simply execute the following command:
 ```bash
