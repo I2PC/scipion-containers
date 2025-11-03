@@ -63,10 +63,17 @@ To run the launcher, simply execute the following command:
 bash launcher.sh
 ```
 
+You can use this same command any time you want to start Scipion again.
+
+If you prefer, you can also create an alias to launch Scipion directly from anywhere, for example:
+```bash
+alias scipion3="bash /path/to/launcher.sh"
+```
+
 When launched, it will automatically download the corresponding image from our OCI registry (`rinchen.cnb.csic.es`) if the image is not available locally.  
 If the image has been downloaded before, it will be reused — avoiding duplication and saving disk space.
 
-*Note: The launcher also supports additional environment variables for further customization (e.g. for integrating with Chimera, CryoSPARC, Cryoassess, or Phenix). Be sure to review and adjust them as needed before running the launcher.
+*Note: The launcher also supports additional environment variables for further customization (e.g. for integrating with Chimera, CryoSPARC, Cryoassess, or Phenix). Be sure to review and adjust them as needed before running the launcher. These variables can be configured at any time — either the first time you run the launcher (when the container is downloaded) or in later runs.
 
 ### 2. Compiling and modifying your own images
 All our recipes are included in the `apptainer` subfolder of this GitHub project.
