@@ -83,4 +83,10 @@ If you prefer or need to build the images yourself — for example, to include c
 
 This script allows you to define which container flavours you want to build by editing the `CONTAINER_FLAVOURS` variable. You must always include base, as it is the foundation for the rest of the flavours.
 
-*Note: Before running `build.sh`, we recommend reviewing the script so you can customize variables like `CONTAINER_FLAVOURS` to fit your needs.*
+#### Configurable variables
+
+The build.sh script has two variables to determine and that should be edited before running it:
+
+- `CONTAINER_FLAVOURS`: this variable defines which container flavours will be built. You can specify a single flavour or a list of multiple flavours, separated by spaces. The base image must always be included, as it serves as the foundation for the rest of the containers. Other flavours (e.g. spa) are built on top of base, so the build process assumes that base already exists or will be created first.
+
+- `APPTAINER_TMPDIR`: directory used for temporary files during image builds. By default, Apptainer uses /tmp or /var/tmp, which may not have enough space. You should point it to a directory on a partition with sufficient space (e.g. APPTAINER_TMPDIR="/data/tmp"). 
