@@ -8,7 +8,7 @@
 | **scipion-em-atomstructutils** 	|                      -                      	|        -        	|         -        	|
 | **scipion-em-atsas**           	|                      -                      	|        -        	|         -        	|
 | **scipion-em-bsoft**           	|                      -                      	|        X        	|         -        	|
-| **scipion-em-ccp4**            	|                      -                      	|        -        	|         -        	|
+| **scipion-em-ccp4**            	|                      -                      	|        X        	|         -        	|
 | **scipion-em-chimera**         	|                      X                      	|        X        	|         X        	|
 | **scipion-em-cistem**          	|                      -                      	|        X        	|         -        	|
 | **scipion-em-continuousflex**  	|                      -                      	|        -        	|         -        	|
@@ -39,7 +39,8 @@
 | **scipion-em-motioncorr**      	|                      -                      	|        X        	|         X        	|
 | **scipion-em-novactf**         	|                      -                      	|        -        	|         -        	|
 | **scipion-em-phenix**          	|                      -                      	|        -        	|         -        	|
-| **scipion-em-prody**           	|                      -                      	|        -        	|         -        	|
+| **scipion-em-opusdsd**           	|                      -                      	|        X        	|         -        	|
+| **scipion-em-prody**           	|                      -                      	|        X        	|         -        	|
 | **scipion-em-pyseg**           	|                      -                      	|        -        	|         -        	|
 | **scipion-em-relion**          	|                      -                      	|        X        	|         -        	|
 | **scipion-em-reliontomo**      	|                      -                      	|        -        	|         -        	|
@@ -54,7 +55,7 @@
 | **scipion-em-tomo3d**          	|                      -                      	|        -        	|         X        	|
 | **scipion-em-tomotwin**        	|                      -                      	|        -        	|         -        	|
 | **scipion-em-tomoviz**         	|                      -                      	|        -        	|         -        	|
-| **scipion-em-topaz**           	|                      -                      	|        -        	|         -        	|
+| **scipion-em-topaz**           	|                      -                      	|        X        	|         -        	|
 | **scipion-em-warp**            	|                      -                      	|        X        	|         -        	|
 | **scipion-em-xmipp**           	|                      X                      	|        X        	|         X        	|
 | **scipion-em-xmipptomo**       	|                      -                      	|        -        	|         X        	|
