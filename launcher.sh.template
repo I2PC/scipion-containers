@@ -29,6 +29,19 @@ $PREPARE_SCREEN
 ### END #######################################################################
 
 
+### CHIMERAX 
+# Point the container to the chimerax folder i.e (/home/chimerax-X.X.X being X.X.X the chimeraX version)
+# Important note: the folder must have an executable called exaclty "ChimeraX". You can do it with a symbolic link.
+CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
+# Update the chimera version (the X.X.X part in the line below) of the chimera location in the container 
+export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
+
+# UNCOMMENT THIS LINE WHEN USING CHIMERAX
+# SCIPCHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
+### CHIMERAX END
+### END #######################################################################
+
+
 ### CRYOSPARC
 # CS will work only if the container has direct access to the cryosparcm binary
 # Point the container to the folder that contains the cryosparc_master folder
@@ -137,7 +150,7 @@ LAUNCH_CMD="apptainer exec --nv --containall \
             --bind $SCIPION_PROJDIR/logs:/logs \
             --bind /run --bind /etc/resolv.conf \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $SCIPCHIMERA_CMD "
 
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
