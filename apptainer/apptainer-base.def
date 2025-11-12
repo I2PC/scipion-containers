@@ -12,6 +12,9 @@ From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 %environment 
   # Add cuda lib to path
   export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+  export QT_X11_NO_MITSHM=1
+  export XDG_RUNTIME_DIR=/tmp/runtime-$USER
+  export LIBGL_ALWAYS_INDIRECT=0 
 
 %post
 # Ezport tz for apt so it does not block on install
