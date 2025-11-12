@@ -118,37 +118,17 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 ### Apptainer directories configuration
 # Define where Apptainer stores data:
 # - APPTAINER_CACHEDIR: base directory where Apptainer will create its internal cache folder (e.g. ~/containers)
-# - CONTAINER_LOCATION: directory where the final .sif image will be stored (e.g. ~/containers/images)
 # - APPTAINER_TMPDIR: directory for temporary files created during image builds 
+# We recommend changing the cachedir to a shared location if you are in a shared/cluster environment
+# This cache will effectively store the images themselves, make sure it has enough space (~300GB)
 export APPTAINER_CACHEDIR="/path/to/your/apptainer/cache"
-export CONTAINER_LOCATION="/path/to/your/containers"
 export APPTAINER_TMPDIR="/path/to/your/apptainer/tmp"
 # Create directories if they don’t exist
-mkdir -p "$APPTAINER_CACHEDIR" "$CONTAINER_LOCATION" "$APPTAINER_TMPDIR"
+mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 
 ###
 ###
 #### END OF USER CONFIGURABLE VARIABLES
-
-# Do not touch below here unless you know what you are doing!
-echo "Preparing to launch Scipion Container"
-CONTAINER="apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION"
-SIF_PATH="$CONTAINER_LOCATION/$CONTAINER.sif"
-if [ -f "$SIF_PATH" ]; then
-    echo "Container already exists at $SIF_PATH"
-else
-    echo "Pulling version $CONTAINER_VERSION from branch $CONTAINER_FLAVOUR"
-    apptainer pull "$SIF_PATH" oras://rinchen.cnb.csic.es/scipion/$CONTAINER
-
-    if [ $? -eq 0 ]; then
-        echo "Cleaning Apptainer cache to save space..."
-        apptainer cache clean --force
-    else
-        echo "Error downloading container. Aborting."
-        exit 1
-    fi
-fi
-
 
 # Launching command
 # GUI is not always an option in compute nodes, thus X11 does not need to be there always
@@ -159,14 +139,41 @@ LAUNCH_CMD="apptainer exec --nv --containall \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
             $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD "
 
+# Do not touch below here unless you know what you are doing!
+echo "Preparing to launch Scipion Container"
+CONTAINER="apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION"
+REMOTE_IMAGE="oras://rinchen.cnb.csic.es/scipion/$CONTAINER"
 
 # Decide if Scipion is getting launched in GUI mode (master) or in headless execution mode (worker)
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
-    $LAUNCH_CMD $SIF_PATH /scipion/scipion3 run $@
+    $LAUNCH_CMD $REMOTE_IMAGE /scipion/scipion3 run $@
 else
-    echo "Launching $CONTAINER_FLAVOUR in standalone mode..."
+    # Check for download/updates
+    echo "Checking for updates..."
+    # Get latest SHA256 digest from rinchen (remote) repository
+    REMOTE_DIGEST=$(apptainer inspect --json $REMOTE_IMAGE 2>/dev/null | jq -r '.data.attributes.digest')
+    # Get latest SHA256 digest from local SIF
+    LOCAL_PATH=$(apptainer cache list --type oras | awk "/$REMOTE_IMAGE/{print \$1}" | tail -n1)
+    echo "Local path: $LOCAL_PATH"
+    LOCAL_DIGEST=$(apptainer inspect --json "$LOCAL_PATH" 2>/dev/null | jq -r '.data.attributes.digest')
+
+    # Compare digests
+    if [[ "$REMOTE_DIGEST" != "$LOCAL_DIGEST" ]]; then
+        echo "Container not found or update available"
+        read -p "Download from remote repository? Y/n: " -r
+        if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]]; then
+            echo "Downloading latest version of $CONTAINER_FLAVOUR..."
+            apptainer pull $REMOTE_IMAGE
+            echo "Container downloaded."
+        else
+            echo "Continuing without download. Note that if this is the first time you launch the container, it will fail."
+        fi
+    else
+        echo "Container is up to date."
+    fi
+    
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
     GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
-    $LAUNCH_CMD $GUI_CMD $SIF_PATH /scipion/scipion3
+    $LAUNCH_CMD $GUI_CMD $REMOTE_IMAGE /scipion/scipion3
 fi
