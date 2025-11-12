@@ -12,6 +12,9 @@ From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 %environment 
   # Add cuda lib to path
   export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+  export QT_X11_NO_MITSHM=1
+  export XDG_RUNTIME_DIR=/tmp/runtime-$USER
+  export LIBGL_ALWAYS_INDIRECT=0 
 
 %post
 # Ezport tz for apt so it does not block on install
@@ -74,12 +77,12 @@ echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 # Scipion font fix
 /scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_*"
 
-# Basic programs: Xmipp and ChimeraX for visualisation#
+# Basic programs: Xmipp and ChimeraX for visualisation (installing only the Chimera plugin)
 /scipion/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+/scipion/scipion3 pip install scipion-em-chimera
 /scipion/scipion3 installb deepLearningToolkit
 
 ln -s /usr/lib/x86_64-linux-gnu/libffi.so /usr/lib/x86_64-linux-gnu/libffi.so.6
-/scipion/scipion3 installp -p scipion-em-chimera
 
 # Cleaning tasks for space optimisation
 apt clean
