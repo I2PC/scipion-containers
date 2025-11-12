@@ -37,7 +37,7 @@ CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
 export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
 
 # UNCOMMENT THIS LINE WHEN USING CHIMERAX
-# CHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
+# SCIPCHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
 ### CHIMERAX END
 ### END #######################################################################
 
@@ -149,7 +149,7 @@ LAUNCH_CMD="apptainer exec --nv --containall \
             --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
             --bind /run --bind /etc/resolv.conf \
             --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $CHIMERA_CMD "
+            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $SCIPCHIMERA_CMD "
 
 CONTAINER="$CONTAINER_LOCATION/$CONTAINER.sif"
 
