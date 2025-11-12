@@ -30,7 +30,8 @@ $PREPARE_SCREEN
 
 
 ### CHIMERAX 
-# Point the container to the chimerax folder i.e (/home/chimerax-X.X.X being X.X.X the chimera x version)
+# Point the container to the chimerax folder i.e (/home/chimerax-X.X.X being X.X.X the chimeraX version)
+# Important note: the folder must have an executable called exaclty "ChimeraX". You can do it with a symbolic link.
 CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
 # Update the chimera version (the X.X.X part in the line below) of the chimera location in the container 
 export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
