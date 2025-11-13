@@ -167,7 +167,7 @@ else
     # Get latest SHA256 digest from rinchen (remote) repository
     REMOTE_DIGEST=$(apptainer inspect --json $REMOTE_IMAGE 2>/dev/null | jq -r '.data.attributes.digest')
     # Get latest SHA256 digest from local SIF
-    LOCAL_PATH=$(apptainer cache list --type oras | awk "/$REMOTE_IMAGE/{print \$1}" | tail -n1)
+    LOCAL_PATH=$(apptainer cache list --type oras | awk -v img="$REMOTE_IMAGE" '$0 ~ img {print $1}' | tail -n1)
     echo "Local path: $LOCAL_PATH"
     LOCAL_DIGEST=$(apptainer inspect --json "$LOCAL_PATH" 2>/dev/null | jq -r '.data.attributes.digest')
 
