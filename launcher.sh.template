@@ -154,39 +154,88 @@ LAUNCH_CMD="apptainer exec --nv --containall \
 
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
-CONTAINER="apptainer-$CONTAINER_FLAVOUR:$CONTAINER_VERSION"
-REMOTE_IMAGE="oras://rinchen.cnb.csic.es/scipion/$CONTAINER"
+REGISTRY="rinchen.cnb.csic.es"
+IMAGE="apptainer-$CONTAINER_FLAVOUR"
+VERSION_FILE="$APPTAINER_CACHEDIR/$IMAGE:latest.version"
+SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:$CONTAINER_VERSION.sif"
+
+UPDATE_NEEDED=0
 
 # Decide if Scipion is getting launched in GUI mode (master) or in headless execution mode (worker)
 if [ "$#" -gt 0 ]; then
     echo "Launching $CONTAINER_FLAVOUR with parameters..."
-    $LAUNCH_CMD $REMOTE_IMAGE /scipion/scipion3 run $@
+    $LAUNCH_CMD $SIF_PATH /scipion/scipion3 run $@
 else
-    # Check for download/updates
-    echo "Checking for updates..."
-    # Get latest SHA256 digest from rinchen (remote) repository
-    REMOTE_DIGEST=$(apptainer inspect --json $REMOTE_IMAGE 2>/dev/null | jq -r '.data.attributes.digest')
-    # Get latest SHA256 digest from local SIF
-    LOCAL_PATH=$(apptainer cache list --type oras | awk -v img="$REMOTE_IMAGE" '$0 ~ img {print $1}' | tail -n1)
-    echo "Local path: $LOCAL_PATH"
-    LOCAL_DIGEST=$(apptainer inspect --json "$LOCAL_PATH" 2>/dev/null | jq -r '.data.attributes.digest')
+    # 1. Check if requested image exists locally
+    if [[ ! -f "$SIF_PATH" ]]; then
+        echo "No local image found at $SIF_PATH"
+        UPDATE_NEEDED=1
+    fi
 
-    # Compare digests
-    if [[ "$REMOTE_DIGEST" != "$LOCAL_DIGEST" ]]; then
-        echo "Container not found or update available"
-        read -p "Download from remote repository? Y/n: " -r
-        if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]]; then
-            echo "Downloading latest version of $CONTAINER_FLAVOUR..."
-            apptainer pull $REMOTE_IMAGE
-            echo "Container downloaded."
+    # 2. Fetch all remote tags
+    TAGS=$(curl -s -u guest:guest "https://$REGISTRY/v2/scipion/$IMAGE/tags/list" | jq -r '.tags[]')
+    LATEST_NUMERIC=$(echo "$TAGS" | grep -E '^[0-9]+$' | sort -V | tail -n1)
+
+    # 3. Determine if update is needed
+    if [[ "$CONTAINER_VERSION" == "latest" ]]; then
+        INSTALLED_VERSION=$(cat "$VERSION_FILE" 2>/dev/null || echo "")
+        if [[ "$INSTALLED_VERSION" != "$LATEST_NUMERIC" ]]; then
+            echo "A newer 'latest' image exists on the server:"
+            echo " - Installed latest = $INSTALLED_VERSION"
+            echo " - Remote latest    = $LATEST_NUMERIC"
+            UPDATE_NEEDED=1
         else
-            echo "Continuing without download. Note that if this is the first time you launch the container, it will fail."
+            echo "Latest version is up to date (numeric tag $INSTALLED_VERSION)."
         fi
     else
-        echo "Container is up to date."
+        # User requested a numeric version
+        if [[ ! -f "$SIF_PATH" ]]; then
+            echo "Requested numeric version $CONTAINER_VERSION not found locally."
+            UPDATE_NEEDED=1
+        elif [[ "$CONTAINER_VERSION" != "$LATEST_NUMERIC" ]]; then
+            echo "A newer numeric version exists on the server: $LATEST_NUMERIC"
+            # Suggest update but do not replace requested version automatically
+            read -p "Do you want to download the newest numeric version $LATEST_NUMERIC? Y/n: " -r
+            if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+                UPDATE_NEEDED=1
+                CONTAINER_VERSION="$LATEST_NUMERIC"
+                SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:$CONTAINER_VERSION.sif"
+            fi
+        else
+            echo "Requested version ($CONTAINER_VERSION) is up to date."
+        fi
     fi
-    
+
+    # 4. Download if necessary
+    if [[ $UPDATE_NEEDED -eq 1 ]]; then
+        read -p "Download from remote repository? Y/n: " -r
+        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+            REMOTE_IMAGE="oras://$REGISTRY/scipion/$IMAGE:$CONTAINER_VERSION"
+            TMP_SIF="$SIF_PATH.tmp"
+            echo "Downloading version $CONTAINER_VERSION..."
+            # Clean ORAS cache before pulling
+            ORAS_DIR="$APPTAINER_CACHEDIR/cache/oras"
+            if [[ -d "$ORAS_DIR" ]]; then
+                echo "Cleaning ORAS cache at $ORAS_DIR..."
+                rm -rf "$ORAS_DIR"/*
+            fi
+            apptainer pull "$TMP_SIF" "$REMOTE_IMAGE"
+            mv "$TMP_SIF" "$SIF_PATH"
+            # Save numeric tag if this is latest
+            if [[ "$CONTAINER_VERSION" == "$LATEST_NUMERIC" && "$CONTAINER_VERSION" == "latest" ]]; then
+                echo "$CONTAINER_VERSION" > "$VERSION_FILE"
+                echo "Stored as latest: $SIF_PATH"
+            else
+                echo "Stored as $SIF_PATH"
+            fi
+            echo "Downloaded version $CONTAINER_VERSION."
+        else
+            echo "Continuing with locally cached version."
+        fi
+    fi
+
+    # Launch container
     echo "Launching Scipion container for $CONTAINER_FLAVOUR"
     GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
-    $LAUNCH_CMD $GUI_CMD $REMOTE_IMAGE /scipion/scipion3
+    $LAUNCH_CMD $GUI_CMD "$SIF_PATH" /scipion/scipion3
 fi
