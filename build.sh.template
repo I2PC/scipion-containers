@@ -23,6 +23,13 @@ PREPARE_SCREEN="xhost +"
 CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
 $CLUSTER_PREP
 
+### Apptainer directories configuration
+# Define where Apptainer stores data:
+#  - APPTAINER_TMPDIR: directory for temporary files created during image builds 
+export APPTAINER_TMPDIR="/path/to/your/apptainer/tmp"
+# Create directories if they don’t exist
+mkdir -p "$APPTAINER_TMPDIR"
+
 ###
 ###
 #### END OF USER CONFIGURABLE VARIABLES
@@ -36,7 +43,7 @@ for F in $CONTAINER_FLAVOURS; do
     TARGET="apptainer-$F"
     echo "Compiling $TARGET image..."
     echo "Result will be in ./build/$TARGET.sif"
-    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force ./build/$TARGET.sif ./apptainer/$TARGET.def
+    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force --tmpdir $APPTAINER_TMPDIR ./build/$TARGET.sif ./apptainer/$TARGET.def
 done
 
 echo "Finished."
