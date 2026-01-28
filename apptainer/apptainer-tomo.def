@@ -3,7 +3,7 @@ From: scipion-base.def
 
 %labels
   Maintainer miceta@cnb.csic.es
-  version 24.02.1
+  version 26.01.28
 
 %help
   Tomography package add-on for Apptainer/Singularity base image
@@ -15,8 +15,24 @@ From: scipion-base.def
 %post
 /scipion/scipion3 installp -p scipion-em-tomo
 /scipion/scipion3 installp -p scipion-em-xmipptomo
-/scipion/scipion3 installp -p scipion-em-tomotwin
-/scipion/scipion3 installp -p scipion-em-tomoviz
+/scipion/scipion3 installp -p scipion-em-imod
+
+/scipion/scipion3 installp -p scipion-em-aretomo
+/scipion/scipion3 installp -p scipion-em-cistem
+/scipion/scipion3 installp -p scipion-em-cryocare
+/scipion/scipion3 installp -p scipion-em-deepfinder
+/scipion/scipion3 installp -p scipion-em-dynamo
+/scipion/scipion3 installp -p scipion-em-eman2
+/scipion/scipion3 installp -p scipion-em-emantomo
+/scipion/scipion3 installp -p scipion-em-fidder
+/scipion/scipion3 installp -p scipion-em-gapstop
+/scipion/scipion3 installp -p scipion-em-membrain
+/scipion/scipion3 installp -p scipion-em-motioncorr
+/scipion/scipion3 installp -p scipion-em-novactf
+/scipion/scipion3 installp -p scipion-em-relion
+/scipion/scipion3 installp -p scipion-em-reliontomo
 /scipion/scipion3 installp -p scipion-em-sphire
-
-
+/scipion/scipion3 installp -p scipion-em-tardis
+/scipion/scipion3 installp -p scipion-em-tomo3d
+/scipion/scipion3 installp -p scipion-em-tomosegmemtv
+/scipion/scipion3 installp -p scipion-em-warp
