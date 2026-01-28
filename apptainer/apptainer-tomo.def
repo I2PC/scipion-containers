@@ -1,5 +1,5 @@
 BootStrap: localimage
-From: scipion-base.def
+From: apptainer-base.sif
 
 %labels
   Maintainer miceta@cnb.csic.es
@@ -8,11 +8,13 @@ From: scipion-base.def
 %help
   Tomography package add-on for Apptainer/Singularity base image
 
-%files
-/scipion
-/opt
-
 %post
+export DEBIAN_FRONTEND=noninteractive
+
+# relion
+apt-get update
+apt-get install -y --no-install-recommends --no-install-suggests build-essential mpi-default-bin mpi-default-dev libtiff-dev libpng-dev ghostscript libxft-dev
+
 /scipion/scipion3 installp -p scipion-em-tomo
 /scipion/scipion3 installp -p scipion-em-xmipptomo
 /scipion/scipion3 installp -p scipion-em-imod
