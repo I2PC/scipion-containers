@@ -1,5 +1,5 @@
 Bootstrap:docker
-From:nvidia/cuda:12.9.1-cudnn-devel-ubuntu24.04
+From:nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 
 %labels
   Maintainer1 miceta@cnb.csic.es
@@ -30,19 +30,21 @@ locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8
 
 # Utilities
-apt install -y --no-install-recommends --no-install-suggests curl git less nano gedit vim wget python3-numpy python3-dev gawk bison flex unzip
+apt install -y --no-install-recommends --no-install-suggests curl git less nano gedit vim wget python3-numpy python3-dev gawk bison flex unzip bash
 # Compilation
-apt install -y --no-install-recommends --no-install-suggests gcc-12 g++-12 make cmake scons default-jdk rsync
+apt install -y --no-install-recommends --no-install-suggests gcc-11 g++-11 make cmake scons default-jdk rsync
 # Xmipp + Scipion libraries
 apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf5-dev libopenmpi-dev libsqlite3-dev libtiff5-dev 
+# Relion libraries
+apt install -y --no-install-recommends --no-install-suggests build-essential mpi-default-bin mpi-default-dev libtiff-dev libpng-dev ghostscript libxft-dev
 # Slurm libraries
 apt install -y --no-install-recommends --no-install-suggests libmunge-dev libmunge2 munge
 # ChimeraX libraries
 apt-get install -y xcb libffi-dev libxcb1-dev libxkbfile-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
 
-# Force GCC-12
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 12
-update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 12
+# Force GCC-11
+update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11
+update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11
 
 # Create a user for SLURM
 adduser slurm
@@ -56,9 +58,6 @@ echo ". /opt/miniforge3/etc/profile.d/conda.sh" >> $SINGULARITY_ENVIRONMENT
 echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
 . /opt/miniforge3/etc/profile.d/conda.sh
 export PATH="/opt/miniforge3/bin:${PATH}"
-
-# Add 'anaconda' channel to conda to access required packages during installation
-conda config --add channels anaconda
 
 # Scipion installation
 conda run -n base pip3 install --user scipion-installer scons numpy
@@ -83,9 +82,10 @@ echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 /scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_*"
 
 # Basic programs: Xmipp and ChimeraX for visualisation (installing only the Chimera plugin)
-/scipion/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+#/scipion/scipion3 installp -p scipion-em-xmipp -j $(nproc)
 /scipion/scipion3 pip install scipion-em-chimera
-/scipion/scipion3 installb deepLearningToolkit
+/scipion/scipion3 pip install pyxmipp3
+#/scipion/scipion3 installb deepLearningToolkit
 
 ln -s /usr/lib/x86_64-linux-gnu/libffi.so /usr/lib/x86_64-linux-gnu/libffi.so.6
 
