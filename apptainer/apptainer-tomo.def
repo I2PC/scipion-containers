@@ -44,9 +44,6 @@ From: ./build/apptainer-base.sif
     export TEMP="$INTERNAL_BUILD_TMP"
     export TMP="$INTERNAL_BUILD_TMP"
     
-    # Force Conda to detect CUDA 12.0 persistently at the system level
-    # conda config --system --set override_virtual_packages.cuda "12.0"
-    
     # Move Conda packages away from /tmp to avoid clashing with Pip
     mkdir -p /opt/cache/conda_pkgs
     export CONDA_PKGS_DIRS=/opt/cache/conda_pkgs
@@ -68,7 +65,16 @@ From: ./build/apptainer-base.sif
     /scipion/scipion3 installp -p scipion-em-eman2
     /scipion/scipion3 installp -p scipion-em-emantomo
     /scipion/scipion3 installp -p scipion-em-fidder
+
+    # 1. Force Conda to detect CUDA 12.0 globally (this survives Scipion's isolated subshells)
+    conda config --system --set override_virtual_packages.cuda "12.0"
+
+    # 2. Install GapStop
     /scipion/scipion3 installp -p scipion-em-gapstop
+
+    # 3. Clean up: Remove the override so the container reverts to normal CUDA 11.8 detection
+    conda config --system --remove-key override_virtual_packages.cuda || true
+
     /scipion/scipion3 installp -p scipion-em-membrain
     /scipion/scipion3 installp -p scipion-em-motioncorr
     /scipion/scipion3 installp -p scipion-em-novactf
