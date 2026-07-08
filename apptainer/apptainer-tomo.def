@@ -2,7 +2,9 @@ BootStrap: localimage
 From: ./build/apptainer-base.sif
 
 %labels
-  Maintainer miceta@cnb.csic.es
+  Maintainer1 miceta@cnb.csic.es
+  Maintainer2 jjimenez@cnb.csic.es
+  Maintainer3 jamoraleda@cnb.csic.es
   version 04.06.2026
 
 %help

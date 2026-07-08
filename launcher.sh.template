@@ -14,7 +14,7 @@
 ### CONTAINER VERSION AND FLAVOUR
 # You can check all existing versions of the images in our GitHub page. 
 # "latest" is always the recommended stable image.
-CONTAINER_VERSION="latest"
+#CONTAINER_VERSION="latest"
 # Available flavours are: base, spa, tomo, full
 CONTAINER_FLAVOUR="spa"
 ### END #######################################################################
@@ -22,57 +22,10 @@ CONTAINER_FLAVOUR="spa"
 ### CLUSTER SPECIFIC
 # You can add your cluster-specific commands here
 #PREPARE_ENV="module load XXX"
-$PREPARE_ENV
+#$PREPARE_ENV
 PREPARE_SCREEN="xhost +local: "
 $PREPARE_SCREEN
 # CLUSTER END
-### END #######################################################################
-
-
-### CHIMERAX 
-# Point the container to the chimerax folder i.e (/home/chimerax-X.X.X being X.X.X the chimeraX version)
-# Important note: the folder must have an executable called exaclty "ChimeraX". You can do it with a symbolic link.
-CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
-# Update the chimera version (the X.X.X part in the line below) of the chimera location in the container 
-export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
-
-# UNCOMMENT THIS LINE WHEN USING CHIMERAX
-# SCIPCHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
-### CHIMERAX END
-### END #######################################################################
-
-
-### CRYOSPARC
-# CS will work only if the container has direct access to the cryosparcm binary
-# Point the container to the folder that contains the cryosparc_master folder
-export CRYOSPARC_HOME="/route/to/cryosparc_folder"
-export CRYOSPARC_PROJECTS_DIR="/route/to/cs_projects"
-export CRYOSPARC_USER="email@something.com"
-export CRYOSPARC_PASSWORD="password"
-
-# UNCOMMENT THIS LINE WHEN USING CRYOSPARC
-#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME --bind $CRYOSPARC_PROJECTS_DIR --env CRYOSPARC_HOME=$CRYOSPARC_HOME --env CRYOSPARC_USER=$CRYOSPARC_USER --env CRYOSPARC_PASSWORD=$CRYOSPARC_PASSWORD "
-### CRYOSPARC END
-### END #######################################################################
-
-
-### CRYOASSESS
-# Point to your CryoAssess models folder 
-SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
-
-# UNCOMMENT THIS LINE WHEN USING CRYOASSESS
-#$SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
-### CRYOASSESS END
-### END #######################################################################
-
-
-### PHENIX
-# Point to your PHENIX installation, as Scipion will not download the binaries
-SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
-
-# UNCOMMENT THIS LINE WHEN USING PHENIX
-#SCIPPHENIX_CMD=" --bind $SCIPPHENIX_FOLDER --env PHENIX_HOME=$SCIPPHENIX_FOLDER "
-### PHENIX END
 ### END #######################################################################
 
 
@@ -81,23 +34,105 @@ SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
 SCIPION_DATADIR="/path/to/your/data/folder"
 # The projdir will house Scipion's project and all of its intermediate data
 SCIPION_PROJDIR="/path/to/your/ScipionUserData"
-# Creatings logs directory
+# Define your local tests directory
+SCIPION_LOCAL_TESTS="/path/to/your/scipion/data/tests"
+# Creating logs directory
 mkdir -p $SCIPION_PROJDIR/logs
 ### END STORAGE
 ### END #######################################################################
 
 
+### MATPLOTLIB RUNTIME CACHE
+# We use the persistent PROJDIR so that source files don't need to be
+# recalculated every time Scipion is launched.
+HOST_MPL_CACHE="$SCIPION_PROJDIR/.cache/matplotlib"
+mkdir -p "$HOST_MPL_CACHE"
+export APPTAINERENV_MPLCONFIGDIR="$HOST_MPL_CACHE"
+### END #######################################################################
 
-### SLURM
+
+# COMMON PLUGINS TO ALL THE DOMAINS ###########################################
+  ### 1. CHIMERAX
+  # Point the container to the chimerax folder i.e (/home/chimerax-X.X.X being X.X.X the chimeraX version)
+  # Important note: the folder must have an executable called exactly "ChimeraX". You can do it with a symbolic link.
+
+# UNCOMMENT THE FOLLOWING LINES WHEN USING IT
+#CHIMERA_HOME="path/to/your/local/chimerax-X.X.X"
+# Update the chimera version (the X.X.X part in the line below) of the chimera location in the container
+#export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
+# SCIPCHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
+
+  ### CHIMERAX END
+### END #######################################################################
+
+
+# SPECIFIC FOR SPA DOMAIN #####################################################
+  ###  1. CRYOSPARC
+  # CS will work only if the container has direct access to the cryosparcm binary
+  # Point the container to the folder that contains the cryosparc_master folder
+
+# UNCOMMENT THE FOLLOWING LINES WHEN USING IT
+#export CRYOSPARC_HOME="/route/to/cryosparc_folder"
+#export CRYOSPARC_PROJECTS_DIR="/route/to/cs_projects"
+#export CRYOSPARC_USER="email@something.com"
+#export CRYOSPARC_PASSWORD="password"
+#SCIPCRYOSPARC_CMD=" --bind $CRYOSPARC_HOME --bind $CRYOSPARC_PROJECTS_DIR --env CRYOSPARC_HOME=$CRYOSPARC_HOME --env CRYOSPARC_USER=$CRYOSPARC_USER --env CRYOSPARC_PASSWORD=$CRYOSPARC_PASSWORD "
+
+  ### CRYOSPARC END
+  ### END #######################################################################
+
+  ### 2. CRYOASSESS
+  # Point to your CryoAssess models folder
+
+# UNCOMMENT THE FOLLOWING LINES WHEN USING IT
+#SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
+#SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
+
+  ### CRYOASSESS END
+  ### END #######################################################################
+
+  ### 3. PHENIX
+  # Point to your PHENIX installation, as Scipion will not download the binaries
+  # UNCOMMENT THE FOLLOWING LINES WHEN USING IT
+
+#SCIPPHENIX_FOLDER="/route/to/your/phenix_folder"
+#SCIPPHENIX_CMD=" --bind $SCIPPHENIX_FOLDER --env PHENIX_HOME=$SCIPPHENIX_FOLDER "
+
+  ### PHENIX END
+  ### END #######################################################################
+
+
+# SPECIFIC FOR TOMOGRAPHY DOMAIN ################################################
+  ### 1. DYNAMO
+  # Matlab Compiler Runtime Cache: We use /tmp (which is local to each node)
+  # and the script PID ($$) to prevent collisions on the NFS filesystem.
+  # Then: Automatic cleanup to ensure that the MCR cache in /tmp is deleted when
+  # Scipion shuts down, freeing disk space on the node.
+  # UNCOMMENT THE FOLLOWING LINES WHEN USING IT
+
+#HOST_MCR_CACHE="/tmp/mcr_cache_${USER}_$$"
+#mkdir -p "$HOST_MCR_CACHE"
+#export APPTAINERENV_MCR_CACHE_ROOT="$HOST_MCR_CACHE"
+#trap 'rm -rf "$HOST_MCR_CACHE"' EXIT
+
+  ### DYNAMO END
+### END #######################################################################
+
+
+### SLURM #####################################################################
 # Modify the variables to point to your actual SLURM installation 
 # Or just ignore if not using SLURM
-SCIPSLURM_HOSTSCONF="/path/to/your/hosts.conf"
-SCIPSLURM_BIN="/usr/bin"
-SCIPSLURM_BASE="/etc/slurm-llnl"
-SCIPSLURM_LIB="/var/lib/slurm-llnl"
+
+#SCIPSLURM_HOSTSCONF="/path/to/your/hosts.conf"
+#SCIPSLURM_BIN="/usr/bin"
+#SCIPSLURM_BASE="/etc/slurm-llnl"
+#SCIPSLURM_LIB="/var/lib/slurm-llnl"
+
 # UNCOMMENT THIS LINE IF YOUR SCIPSLURM_LIB HAS MORE LIBRARIES APPART FROM THE SLURM ONE
 #SCIPSLURM_LIB_DEPENDENCIES="--bind /lib/x86_64-linux-gnu/libc.so.* --bind /lib/x86_64-linux-gnu/libm.so.* --bind /lib/x86_64-linux-gnu/libresolv.so.* --bind /lib/x86_64-linux-gnu/ld-linux-x86-64.so.*"
-SCIPSLURM_PLUGINS="/usr/lib/x86_64-linux-gnu/slurm-wlm/"
+
+#SCIPSLURM_PLUGINS="/usr/lib/x86_64-linux-gnu/slurm-wlm/"
+
 # Usual locations (check your specific case)
 # BIN -> /usr/bin, /opt/slurm/bin, /bin
 # BASE -> /etc/slurm-llnl, /etc/slurm
@@ -107,11 +142,11 @@ SCIPSLURM_PLUGINS="/usr/lib/x86_64-linux-gnu/slurm-wlm/"
 # PLUGINS -> /usr/lib/x86_64-linux-gnu/slurm-wlm/ (ubuntu apt), /usr/lib64/slurm (CentOS)
 ###
 # DONT TOUCH THESE
-SCIPSLURM_JOBS=" --bind $SCIPSLURM_BIN/sbatch --bind $SCIPSLURM_BIN/srun --bind $SCIPSLURM_BIN/scancel --bind $SCIPSLURM_BIN/salloc "
-SCIPSLURM_CTRL=" --bind $SCIPSLURM_BIN/squeue --bind $SCIPSLURM_BIN/sinfo \
-                 --bind $SCIPSLURM_BIN/scontrol --bind $SCIPSLURM_BIN/sstat --bind $SCIPSLURM_BIN/sacct "
-SCIPSLURM_CONF=" --bind $SCIPSLURM_BASE --bind $SCIPSLURM_HOSTSCONF:/scipion/config/hosts.conf "
-SCIPSLURM_LIBS="${SCIPSLURM_LIB:+--bind $SCIPSLURM_LIB} ${SCIPSLURM_LIB_DEPENDENCIES:+--bind $SCIPSLURM_LIB_DEPENDENCIES} ${SCIPSLURM_PLUGINS:+--bind $SCIPSLURM_PLUGINS} "
+#SCIPSLURM_JOBS=" --bind $SCIPSLURM_BIN/sbatch --bind $SCIPSLURM_BIN/srun --bind $SCIPSLURM_BIN/scancel --bind $SCIPSLURM_BIN/salloc "
+#SCIPSLURM_CTRL=" --bind $SCIPSLURM_BIN/squeue --bind $SCIPSLURM_BIN/sinfo \
+#                 --bind $SCIPSLURM_BIN/scontrol --bind $SCIPSLURM_BIN/sstat --bind $SCIPSLURM_BIN/sacct "
+#SCIPSLURM_CONF=" --bind $SCIPSLURM_BASE --bind $SCIPSLURM_HOSTSCONF:/scipion/config/hosts.conf "
+#SCIPSLURM_LIBS="${SCIPSLURM_LIB:+--bind $SCIPSLURM_LIB} ${SCIPSLURM_LIB_DEPENDENCIES:+--bind $SCIPSLURM_LIB_DEPENDENCIES} ${SCIPSLURM_PLUGINS:+--bind $SCIPSLURM_PLUGINS} "
 # UNCOMMENT THIS LINE WHEN USING SLURM
 #SCIPSLURM_CMD=" $SCIPSLURM_JOBS $SCIPSLURM_CTRL $SCIPSLURM_CONF $SCIPSLURM_LIBS "
 # END OF SLURM CONFIGURATION VARIABLES
@@ -134,10 +169,10 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 # - APPTAINER_TMPDIR: directory for temporary files created during image builds 
 # We recommend changing the cachedir to a shared location if you are in a shared/cluster environment
 # This cache will effectively store the images themselves, make sure it has enough space (~300GB)
-export APPTAINER_CACHEDIR="/path/to/your/apptainer/cache"
-export APPTAINER_TMPDIR="/path/to/your/apptainer/tmp"
+#export APPTAINER_CACHEDIR="/path/to/your/apptainer/cache"
+#export APPTAINER_TMPDIR="/path/to/your/apptainer/tmp"
 # Create directories if they don’t exist
-mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
+#mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 
 ###
 ###
@@ -145,111 +180,139 @@ mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 
 # Launching command
 # GUI is not always an option in compute nodes, thus X11 does not need to be there always
-LAUNCH_CMD="apptainer exec --nv --containall \
-            --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
-            --bind $SCIPION_PROJDIR/logs:/logs \
-            --bind /run --bind /etc/resolv.conf \
-            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $SCIPCHIMERA_CMD "
+LAUNCH_CMD=(
+  apptainer exec --nv --containall
+  --env SCIPION_USER_DATA="$SCIPION_PROJDIR"
+  --env SCIPION_TESTS="$SCIPION_LOCAL_TESTS"
+  --bind "$SCIPION_PROJDIR/logs:/logs"
+  --bind /run
+  --bind /etc/resolv.conf
+  --bind "$SCIPION_DATADIR:/data"
+  --bind "$SCIPION_PROJDIR"
+  --bind "$SCIPION_LOCAL_TESTS"
+  $SCIPCRYOSPARC_CMD
+  $SCIPCRYOASSESS_CMD
+  $SCIPPHENIX_CMD
+  $SCIPSLURM_CMD
+  $SCIPCHIMERA_CMD
+  $SCIP_CACHES_CMD
+  $SCIPMPI_CMD
+)
+
+GUI_CMD=(
+  --env DISPLAY="$DISPLAY"
+  --bind /tmp/.X11-unix
+)
+
+#LAUNCH_CMD="apptainer exec --nv --containall \
+#            --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+#            --env SCIPION_TESTS=$SCIPION_LOCAL_TESTS \
+#            --bind $SCIPION_PROJDIR/logs:/logs \
+#            --bind /run --bind /etc/resolv.conf \
+#            --bind $SCIPION_DATADIR:/data \
+#            --bind $SCIPION_PROJDIR \
+#            --bind $SCIPION_LOCAL_TESTS \
+#            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $SCIPCHIMERA_CMD $SCIP_CACHES_CMD"
 
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
-REGISTRY="rinchen.cnb.csic.es"
+SCIPION_IMAGE_DIR="./build"
 IMAGE="apptainer-$CONTAINER_FLAVOUR"
-APPTAINER_CACHEDIR="${APPTAINER_CACHEDIR:-$HOME/.apptainer}"
-mkdir -p "$APPTAINER_CACHEDIR"
+SIF_PATH="$SCIPION_IMAGE_DIR/$IMAGE.sif"
+#APPTAINER_CACHEDIR="${APPTAINER_CACHEDIR:-$HOME/.apptainer}"
+#mkdir -p "$APPTAINER_CACHEDIR"
 
-# Paths
-VERSION_FILE="$APPTAINER_CACHEDIR/$IMAGE:latest.version"
-LOG_FILE="$APPTAINER_CACHEDIR/container_downloads.log"
-if [[ "$CONTAINER_VERSION" == "latest" ]]; then
-    SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:latest.sif"
-else
-    SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:$CONTAINER_VERSION.sif"
-fi
-
-UPDATE_NEEDED=0
-
-# ----------------------------
-# Fetch remote tags and latest numeric version
-# ----------------------------
-TAGS=$(curl -s -u guest:guest "https://$REGISTRY/v2/scipion/$IMAGE/tags/list" | jq -r '.tags[]')
-LATEST_NUMERIC=$(echo "$TAGS" | grep -E '^[0-9]+$' | sort -V | tail -n1)
-
-# Read installed latest numeric version
-INSTALLED_VERSION=""
-[[ -f "$VERSION_FILE" ]] && INSTALLED_VERSION=$(cat "$VERSION_FILE")
-
-# ----------------------------
-# Decide whether to download/update
-# ----------------------------
-if [[ "$CONTAINER_VERSION" == "latest" ]]; then
-    if [[ "$INSTALLED_VERSION" != "$LATEST_NUMERIC" ]]; then
-        echo "A newer 'latest' image exists on the server:"
-        echo " - Installed latest = $INSTALLED_VERSION"
-        echo " - Remote latest    = $LATEST_NUMERIC"
-        read -p "Do you want to download it? Y/n: " -r
-        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
-            UPDATE_NEEDED=1
-        else
-            echo "Using local version of latest ($INSTALLED_VERSION)."
-        fi
-    else
-        echo "Latest version is up to date (numeric tag $INSTALLED_VERSION)."
-    fi
-else
-    if [[ ! -f "$SIF_PATH" ]]; then
-        echo "Requested numeric version $CONTAINER_VERSION not found locally."
-        read -p "Do you want to download it? Y/n: " -r
-        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
-            UPDATE_NEEDED=1
-        fi
-    elif [[ "$CONTAINER_VERSION" != "$LATEST_NUMERIC" ]]; then
-        echo "A newer numeric version exists on the server: $LATEST_NUMERIC"
-        read -p "Do you want to download the newest numeric version $LATEST_NUMERIC as latest? Y/n: " -r
-        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
-            UPDATE_NEEDED=1
-            CONTAINER_VERSION="$LATEST_NUMERIC"
-            SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:latest.sif"
-        else
-            echo "Continuing with requested version $CONTAINER_VERSION."
-        fi
-    fi
-fi
-
-# ----------------------------
-# Pull the container if needed
-# ----------------------------
-if [[ $UPDATE_NEEDED -eq 1 ]]; then
-    REMOTE_IMAGE="oras://$REGISTRY/scipion/$IMAGE:$LATEST_NUMERIC"
-    TMP_SIF="$SIF_PATH.tmp"
-
-    # Pull the container
-    echo "Downloading $LATEST_NUMERIC..."
-    apptainer pull "$TMP_SIF" "$REMOTE_IMAGE"
-    mv "$TMP_SIF" "$SIF_PATH"
-
-    # Clean ORAS cache for this image only
-    ORAS_DIR="$APPTAINER_CACHEDIR/cache/oras"
-    if [[ -d "$ORAS_DIR" ]]; then
-        echo "Cleaning ORAS cache for $IMAGE:$LATEST_NUMERIC..."
-        find "$ORAS_DIR" -type f -name "sha256*" -exec rm -f {} \;
-    fi
-
-    # Save numeric tag if latest
-    if [[ "$CONTAINER_VERSION" == "latest" || "$SIF_PATH" == *"latest.sif" ]]; then
-        echo "$LATEST_NUMERIC" > "$VERSION_FILE"
-    fi
-
-    # Log the download
-    echo "$(date '+%Y-%m-%d %H:%M:%S') | $CONTAINER_FLAVOUR | $LATEST_NUMERIC | latest=$LATEST_NUMERIC" >> "$LOG_FILE"
-
-    echo "Downloaded version $LATEST_NUMERIC as $SIF_PATH."
-fi
+## Paths
+#VERSION_FILE="$APPTAINER_CACHEDIR/$IMAGE:latest.version"
+#LOG_FILE="$APPTAINER_CACHEDIR/container_downloads.log"
+#if [[ "$CONTAINER_VERSION" == "latest" ]]; then
+#    SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:latest.sif"
+#else
+#    SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:$CONTAINER_VERSION.sif"
+#fi
+#
+#UPDATE_NEEDED=0
+#
+## ----------------------------
+## Fetch remote tags and latest numeric version
+## ----------------------------
+#REGISTRY="rinchen.cnb.csic.es"
+#TAGS=$(curl -s -u guest:guest "https://$REGISTRY/v2/scipion/$IMAGE/tags/list" | jq -r '.tags[]')
+#LATEST_NUMERIC=$(echo "$TAGS" | grep -E '^[0-9]+$' | sort -V | tail -n1)
+#
+## Read installed latest numeric version
+#INSTALLED_VERSION=""
+#[[ -f "$VERSION_FILE" ]] && INSTALLED_VERSION=$(cat "$VERSION_FILE")
+#
+## ----------------------------
+## Decide whether to download/update
+## ----------------------------
+#if [[ "$CONTAINER_VERSION" == "latest" ]]; then
+#    if [[ "$INSTALLED_VERSION" != "$LATEST_NUMERIC" ]]; then
+#        echo "A newer 'latest' image exists on the server:"
+#        echo " - Installed latest = $INSTALLED_VERSION"
+#        echo " - Remote latest    = $LATEST_NUMERIC"
+#        read -p "Do you want to download it? Y/n: " -r
+#        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+#            UPDATE_NEEDED=1
+#        else
+#            echo "Using local version of latest ($INSTALLED_VERSION)."
+#        fi
+#    else
+#        echo "Latest version is up to date (numeric tag $INSTALLED_VERSION)."
+#    fi
+#else
+#    if [[ ! -f "$SIF_PATH" ]]; then
+#        echo "Requested numeric version $CONTAINER_VERSION not found locally."
+#        read -p "Do you want to download it? Y/n: " -r
+#        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+#            UPDATE_NEEDED=1
+#        fi
+#    elif [[ "$CONTAINER_VERSION" != "$LATEST_NUMERIC" ]]; then
+#        echo "A newer numeric version exists on the server: $LATEST_NUMERIC"
+#        read -p "Do you want to download the newest numeric version $LATEST_NUMERIC as latest? Y/n: " -r
+#        if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+#            UPDATE_NEEDED=1
+#            CONTAINER_VERSION="$LATEST_NUMERIC"
+#            SIF_PATH="$APPTAINER_CACHEDIR/$IMAGE:latest.sif"
+#        else
+#            echo "Continuing with requested version $CONTAINER_VERSION."
+#        fi
+#    fi
+#fi
+#
+## ----------------------------
+## Pull the container if needed
+## ----------------------------
+#if [[ $UPDATE_NEEDED -eq 1 ]]; then
+#    REMOTE_IMAGE="oras://$REGISTRY/scipion/$IMAGE:$LATEST_NUMERIC"
+#    TMP_SIF="$SIF_PATH.tmp"
+#
+#    # Pull the container
+#    echo "Downloading $LATEST_NUMERIC..."
+#    apptainer pull "$TMP_SIF" "$REMOTE_IMAGE"
+#    mv "$TMP_SIF" "$SIF_PATH"
+#
+#    # Clean ORAS cache for this image only
+#    ORAS_DIR="$APPTAINER_CACHEDIR/cache/oras"
+#    if [[ -d "$ORAS_DIR" ]]; then
+#        echo "Cleaning ORAS cache for $IMAGE:$LATEST_NUMERIC..."
+#        find "$ORAS_DIR" -type f -name "sha256*" -exec rm -f {} \;
+#    fi
+#
+#    # Save numeric tag if latest
+#    if [[ "$CONTAINER_VERSION" == "latest" || "$SIF_PATH" == *"latest.sif" ]]; then
+#        echo "$LATEST_NUMERIC" > "$VERSION_FILE"
+#    fi
+#
+#    # Log the download
+#    echo "$(date '+%Y-%m-%d %H:%M:%S') | $CONTAINER_FLAVOUR | $LATEST_NUMERIC | latest=$LATEST_NUMERIC" >> "$LOG_FILE"
+#
+#    echo "Downloaded version $LATEST_NUMERIC as $SIF_PATH."
+#fi
 
 # ----------------------------
 # Launch container
 # ----------------------------
 echo "Launching Scipion container for $CONTAINER_FLAVOUR"
-GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
-$LAUNCH_CMD $GUI_CMD "$SIF_PATH" /scipion/scipion3 "$@"
+"${LAUNCH_CMD[@]}" "${GUI_CMD[@]}" "$SIF_PATH" /scipion/scipion3 "$@"

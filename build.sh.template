@@ -15,7 +15,7 @@
 # For example, CONTAINER_FLAVOURS="base spa"
 # Remember that you will need base for any container
 CONTAINER_FLAVOURS="base spa"
-CONTAINER_VERSION="latest"
+VERSION=$(date +%Y.%m.%d)
 
 ### CLUSTER SPECIFIC
 # You can add your cluster-specific commands here
@@ -24,15 +24,17 @@ PREPARE_SCREEN="xhost +"
 CLUSTER_PREP="$PREPARE_ENV $PREPARE_SCREEN"
 $CLUSTER_PREP
 
+### Where the SIF images are stored
+SCIPION_IMAGE_DIR="./build"
+mkdir -p "$SCIPION_IMAGE_DIR"
+
 ### Apptainer directories configuration
 # Define where Apptainer stores data:
 #  - APPTAINER_TMPDIR: directory for temporary files created during image builds
-#  - APPTAINER_CACHEDIR: base directory where Apptainer will create its internal cache folder (e.g. ~/containers)
 export APPTAINER_TMPDIR="/path/to/your/apptainer/tmp"
-export APPTAINER_CACHEDIR="/path/to/your/apptainer/cache"
 
 # Create directories if they don’t exist
-mkdir -p "$APPTAINER_TMPDIR" "$APPTAINER_CACHEDIR" "./build"
+mkdir -p "$APPTAINER_TMPDIR" "$SCIPION_IMAGE_DIR"
 
 ###
 ###
@@ -46,10 +48,11 @@ echo "System will build $CONTAINER_FLAVOURS"
 for F in $CONTAINER_FLAVOURS; do
     TARGET="apptainer-$F"
     echo "Compiling $TARGET image..."
-    echo "Result will be in ./build/$TARGET.sif"
-    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force --tmpdir $APPTAINER_TMPDIR "./build/$TARGET.sif" "./apptainer/$TARGET.def"
-    # make a link in cache dir that will be used to check for updates when tha container is launched
-    ln -s "$(realpath "./build/$TARGET.sif")" "$APPTAINER_CACHEDIR/$TARGET:$CONTAINER_VERSION.sif"
+    echo "Result will be in $SCIPION_IMAGE_DIR/$TARGET.sif"
+    OUT_SIF="$SCIPION_IMAGE_DIR/$TARGET.sif"
+    DEF_FILE="apptainer/$TARGET.def"
+    APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force --tmpdir "$APPTAINER_TMPDIR" "$OUT_SIF" "$DEF_FILE"
+    # Create a version file for each flavour
+    echo "$VERSION" > "$SCIPION_IMAGE_DIR/$TARGET-version"
 done
-
 echo "Finished."
