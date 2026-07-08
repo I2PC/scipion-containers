@@ -58,7 +58,7 @@ export CRYOSPARC_PASSWORD="password"
 
 ### CRYOASSESS
 # Point to your CryoAssess models folder 
-$SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
+SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
 
 # UNCOMMENT THIS LINE WHEN USING CRYOASSESS
 #$SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
