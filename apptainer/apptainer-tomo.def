@@ -1,22 +1,245 @@
 BootStrap: localimage
-From: scipion-base.def
+From: ./build/apptainer-base.sif
 
 %labels
   Maintainer miceta@cnb.csic.es
-  version 24.02.1
+  version 04.06.2026
 
 %help
   Tomography package add-on for Apptainer/Singularity base image
-
-%files
-/scipion
-/opt
-
+  
+%environment
+    # This section sets variables available at RUNTIME when you execute the container.
+    export XDG_CACHE_HOME=/opt/cache
+    export MPLCONFIGDIR=/opt/cache/matplotlib
+    
 %post
-/scipion/scipion3 installp -p scipion-em-tomo
-/scipion/scipion3 installp -p scipion-em-xmipptomo
-/scipion/scipion3 installp -p scipion-em-tomotwin
-/scipion/scipion3 installp -p scipion-em-tomoviz
-/scipion/scipion3 installp -p scipion-em-sphire
+    # This section sets variables available at BUILD TIME inside the container.
+
+    # Force all container processes to use this global directory for cache
+    # instead of the restrictive tmpfs home directory.
+    export XDG_CACHE_HOME=/opt/cache
+    mkdir -p $XDG_CACHE_HOME
+    
+    # Initialize conda path from base image
+    export PATH="/opt/miniforge3/bin:${PATH}"
+    
+    # Tell apt-get not to ask questions during the installation
+    export DEBIAN_FRONTEND=noninteractive
+    
+    # Ignore the warning: WARNING: Running pip as the 'root' user can result in broken permissions...
+    export PIP_ROOT_USER_ACTION=ignore
+    
+    # Fix Pip timeout variables and increase retries
+    export PIP_TIMEOUT=1000
+    export PIP_RETRIES=20
+    
+    # Create a robust build-time temp directory inside the container's root
+    # This prevents filling up Apptainer's restricted memory-backed /tmp
+    export INTERNAL_BUILD_TMP="/opt/build_tmp"
+    mkdir -p "$INTERNAL_BUILD_TMP"
+    export TMPDIR="$INTERNAL_BUILD_TMP"
+    export TEMP="$INTERNAL_BUILD_TMP"
+    export TMP="$INTERNAL_BUILD_TMP"
+    
+    # Force Conda to detect CUDA 12.0 persistently at the system level
+    # conda config --system --set override_virtual_packages.cuda "12.0"
+    
+    # Move Conda packages away from /tmp to avoid clashing with Pip
+    mkdir -p /opt/cache/conda_pkgs
+    export CONDA_PKGS_DIRS=/opt/cache/conda_pkgs
+    
+    # Install the remaining OS dependencies
+    apt-get update
+    apt-get install -y --no-install-recommends --no-install-suggests build-essential mpi-default-bin mpi-default-dev libtiff-dev libpng-dev ghostscript libxft-dev
+
+    ####################################################################################################################
+    # Install the plugins over the existing base
+    ####################################################################################################################
+    /scipion/scipion3 installp -p scipion-em-tomo
+    /scipion/scipion3 installp -p scipion-em-imod
+    /scipion/scipion3 installp -p scipion-em-aretomo
+    /scipion/scipion3 installp -p scipion-em-cistem
+    /scipion/scipion3 installp -p scipion-em-cryocare
+    /scipion/scipion3 installp -p scipion-em-deepfinder
+    /scipion/scipion3 installp -p scipion-em-dynamo
+    /scipion/scipion3 installp -p scipion-em-eman2
+    /scipion/scipion3 installp -p scipion-em-emantomo
+    /scipion/scipion3 installp -p scipion-em-fidder
+    /scipion/scipion3 installp -p scipion-em-gapstop
+    /scipion/scipion3 installp -p scipion-em-membrain
+    /scipion/scipion3 installp -p scipion-em-motioncorr
+    /scipion/scipion3 installp -p scipion-em-novactf
+    /scipion/scipion3 installp -p scipion-em-relion
+    /scipion/scipion3 installp -p scipion-em-reliontomo
+    /scipion/scipion3 installp -p scipion-em-sphire
+    /scipion/scipion3 installp -p scipion-em-tardis
+    /scipion/scipion3 installp -p scipion-em-tomo3d
+    /scipion/scipion3 installp -p scipion-em-tomosegmemtv
+    /scipion/scipion3 installp -p scipion-em-warp
+    
+    CONDA_HOOK_CMD='/opt/miniforge3/bin/conda shell.bash hook'
+    eval "$($CONDA_HOOK_CMD)"    
+
+    ####################################################################################################################
+    # Fidder required actions
+    ####################################################################################################################
+    # Download fidder model only if fidder is listed by Scipion pip
+    if /scipion/scipion3 pip list 2>/dev/null | grep -q "fidder"; then
+        echo "-> fidder detected. Downloading fidder pretrained model..."
+
+        conda activate fidder-0.0.8
+
+        # Pooch will fetch 'fidder.ckpt' and save it to /opt/cache/fidder
+        python -c "from fidder.model._pretrained_weights import get_latest_checkpoint; get_latest_checkpoint()"
+        
+        conda deactivate
+    else
+        echo "-> fidder not detected in /scipion/scipion3 pip list. Skipping fidder model download."
+    fi
+
+    ####################################################################################################################
+    # Tardis required actions
+    ####################################################################################################################
+    if /scipion/scipion3 pip list 2>/dev/null | grep -q "tardis"; then
+        echo "-> tardis detected. Downloading TARDIS pretrained models..."
+	
+	# Define a dedicated Home for Tardis in the shared location of the apptainer
+	export TARDIS_HOME="/opt/tardis_home"
+        mkdir -p "$TARDIS_HOME"
+        # Ensure the global writing/execution rights foreach user
+        chmod -R 755 "$TARDIS_HOME"
+
+        conda activate tardis-0.3.10
+        
+        
+        echo "--> Downloading Microtubules models..."
+	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('fnet_attn','32','microtubules_3d')"
+	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('dist','triang','2d')"
+	
+	echo "--> Downloading Membrane models..."
+	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('fnet_attn','32','membrane_3d')"
+	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('dist','triang','3d')"
+	
+        echo "--> Downloading Actin model..."
+	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('fnet_attn','32','actin_3d')"
+        
+        conda deactivate
+        
+	# --- Hijack Tardis executables to enforce custom HOME ---
+        echo "-> Hijacking Tardis binaries to prevent User HOME (Errno 28) issues..."
+    
+        # Define the path to the Conda environment's bin directory
+        TARDIS_BIN_DIR="/opt/miniforge3/envs/tardis-0.3.10/bin"
+    
+        # Iterate over the three specific Tardis tools
+        for TOOL in tardis_actin tardis_mem tardis_mt; do
+            TARGET_BIN="${TARDIS_BIN_DIR}/${TOOL}"
+        
+            # Check if the binary exists to prevent build script failures
+            if [ -f "$TARGET_BIN" ]; then
+                echo "--> Hijacking ${TOOL}..."
+            
+                # 1. Rename the original Python binary
+                mv "$TARGET_BIN" "${TARGET_BIN}_real"
+            
+                # 2. Create the bash wrapper exactly where Scipion expects the tool
+                cat << EOF > "$TARGET_BIN"
+#!/bin/bash
+# Isolate the HOME variable for this child process to point to the cached models
+export HOME=/opt/tardis_home
+exec "${TARGET_BIN}_real" "\$@"
+EOF
+            
+                # 3. Restore execution permissions to the new wrapper
+                chmod +x "$TARGET_BIN"
+            else
+                echo "--> WARNING: ${TOOL} not found. (Check if the name is 'tardis_membrane' or 'tardis_microtubules' instead)."
+            fi
+        done
+    
+        echo "-> Tardis binaries successfully hijacked."
+
+    else
+        echo "-> tardis not detected in /scipion/scipion3 pip list. Skipping TARDIS model download."
+    fi
+
+    ####################################################################################################################
+    # Dynamo required actions: fix MCR libstdc++.so
+    ####################################################################################################################
+    if /scipion/scipion3 pip list 2>/dev/null | grep -q "dynamo"; then
+        echo "-> Dynamo detected. Fixing Dynamo MCR libstdc++.so.6 link..."
+        export PATH="/usr/local/cuda/bin:${PATH}"
+	export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+	
+	DYNAMO_HOME=/scipion/software/em/dynamo-1.1.532
+
+        if [ -z "$DYNAMO_HOME" ]; then
+            echo "ERROR: Dynamo package detected, but Dynamo installation directory was not found under /scipion/software/em."
+            exit 1
+        fi
+
+        MCR_DIR="$DYNAMO_HOME/MCRLinux/sys/os/glnxa64"
+
+	# Find dynamically the system lib
+        SYSTEM_LIB="$(find /usr/lib/x86_64-linux-gnu /usr/lib64 /lib64 /usr/lib \
+            -name "libstdc++.so.6" -print -quit 2>/dev/null || true)"
+
+        if [ -z "$SYSTEM_LIB" ]; then
+            echo "ERROR: Could not find libstdc++.so.6 in the base system."
+            exit 1
+        fi
+
+        echo "-> Dynamo home found at: $DYNAMO_HOME"
+        echo "-> System library found at: $SYSTEM_LIB"
+
+        # Check that the MCR directory exists before operating
+	if [ -d "$MCR_DIR" ]; then
+            # Remove the old libstdc++ symlinks and files from the Dynamo MCR
+            echo "-> Removing old libstdc++.so.6 from Dynamo..."
+            rm -f "$MCR_DIR"/libstdc++.so.6*
+
+            # Copy the actual system library binary instead of symlinking
+            # The -L flag ensures we copy the target of the symlink, not the symlink itself
+            cp -L "$SYSTEM_LIB" "$MCR_DIR/libstdc++.so.6"
+
+            echo "-> Library successfully copied: $SYSTEM_LIB -> $MCR_DIR/libstdc++.so.6"
+        else
+            echo "ERROR: MCR directory not found at $MCR_DIR."
+            echo "Make sure Dynamo was correctly installed before running this step."
+            exit 1
+        fi
+    else
+        echo "-> Dynamo not detected in /scipion/scipion3 pip list. Skipping Dynamo libstdc++.so.6 fix."
+    fi
+
+    ####################################################################################################################
+    # Matplotlob required actions
+    ####################################################################################################################
+    # Pre-generate Matplotlib's cache
+    echo "-> Pre-generating Matplotlib's cache..."
+    export MPLCONFIGDIR=/opt/cache/matplotlib
+    mkdir -p $MPLCONFIGDIR
+    
+    # Importing pyplot forces Matplotlib to build the font cache
+    conda activate scipion3
+    python -c "import matplotlib.pyplot"
+    conda deactivate
+
+    ####################################################################################################################
+    # Make the cache directory readable and executable by all users
+    # so any HPC user running the container can access the weights
+    ####################################################################################################################
+    if [ -n "$XDG_CACHE_HOME" ]; then
+	chmod -R 755 "$XDG_CACHE_HOME"
+    else
+	echo "WARNING: XDG_CACHE_HOME is empty, skipping chmod"
+    fi
+
+    ####################################################################################################################
+    # Some cleaning
+    ####################################################################################################################
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 
