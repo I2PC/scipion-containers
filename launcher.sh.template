@@ -216,7 +216,8 @@ GUI_CMD=(
 
 # Do not touch below here unless you know what you are doing!
 echo "Preparing to launch Scipion Container"
-SCIPION_IMAGE_DIR="./build"
+LAUNCHER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCIPION_IMAGE_DIR="$LAUNCHER_DIR/build"
 IMAGE="apptainer-$CONTAINER_FLAVOUR"
 SIF_PATH="$SCIPION_IMAGE_DIR/$IMAGE.sif"
 #APPTAINER_CACHEDIR="${APPTAINER_CACHEDIR:-$HOME/.apptainer}"
