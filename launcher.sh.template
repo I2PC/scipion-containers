@@ -153,13 +153,71 @@ export APPTAINERENV_MPLCONFIGDIR="$HOST_MPL_CACHE"
 ### END #######################################################################
 
 ### Message Passing Interface (MPI)
-# Many programs (such as Relion & Xmipp) require MPI
-# Simple tasks such as extract particles will fail if this is not configured
-# LIB is usually /usr/lib/x86_64-linux-gnu/openmpi (Ubuntu-APT) or /usr/lib64/openmpi/ (CentOS-YUM)
-# Depending on your system, it might also be in /opt or even be mpich instead of openmpi
-# If in doubt, check with your nearest IT manager
-SCIPMPI_LIB=" /usr/lib/x86_64-linux-gnu/openmpi "
-SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
+# Many programs (such as Relion & Xmipp) require MPI. RELION's *_mpi binaries
+# have NO bundled mpirun: they link against the system OpenMPI, so the whole
+# OpenMPI stack the container uses at run time must be ONE consistent set, and
+# it must match the OpenMPI generation the CONTAINER was built against.
+#
+# IMPORTANT: binding ONLY the OpenMPI plugin dir (the old behaviour) breaks
+# PMIx, because the bound plugins then resolve libpmix from the container
+# instead of from the host, giving:
+#     mca_pmix_ext3x.so: undefined symbol: PMIx_Info_create   (mpirun exit 127)
+# We therefore bind the COMPLETE host OpenMPI stack.
+#
+# Uncomment exactly ONE block below, matching your host AND the OpenMPI the
+# container was built with. Check on the target node with:  mpirun --version
+#   4.x -> uses ORTE (orted), libopen-rte / libopen-pal, libmpi.so.40  (BLOCK A)
+#   5.x -> uses PRRTE (prted/prterun), NO libopen-rte, different sonames, and
+#          PMIx is a separate library. The container's RELION must ALSO be a
+#          5.x build; a 4.x build will not load against 5.x.               (BLOCK B)
+#
+# CLUSTER_MPI_PREFIX: root of the OpenMPI installation the container must use.
+#   - Ubuntu/Debian system OpenMPI (apt):          /usr
+#   - Environment-module / spack / source build:   e.g. /opt/openmpi-5.0.6
+CLUSTER_MPI_PREFIX="/usr"
+
+# ==========================================================================
+# BLOCK A — OpenMPI 4.x  (ACTIVE) — system-package layout, bind pieces
+# ==========================================================================
+# On Ubuntu/Debian libs live in a multiarch subdir; on module installs, lib/.
+CLUSTER_MPI_BINDIR="$CLUSTER_MPI_PREFIX/bin"
+CLUSTER_MPI_LIBDIR="$CLUSTER_MPI_PREFIX/lib/x86_64-linux-gnu"   # module-style: use "$CLUSTER_MPI_PREFIX/lib"
+# Launcher binaries + core libs RELION links against + PMIx runtime deps its
+# plugins dlopen. Verify the versioned names on your host: ls "$CLUSTER_MPI_LIBDIR"
+# (pmix2 is a DIRECTORY: libpmix.so.2 is a symlink into it, so bind it too).
+SCIPMPI_BINS="mpirun orted mpiexec"
+SCIPMPI_CORELIBS="libmpi.so.40 libmpi_cxx.so.40 libopen-rte.so.40 libopen-pal.so.40"
+SCIPMPI_PMIXLIBS="libpmix.so.2 libevent_core-2.1.so.7 libhwloc.so.15"
+SCIPMPI_PMIXDIRS="pmix2"
+
+# Build the bind list (each piece is skipped if it does not exist on this host).
+SCIPMPI_CMD=" --bind /tmp "
+for _b in $SCIPMPI_BINS; do
+    [ -e "$CLUSTER_MPI_BINDIR/$_b" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_BINDIR/$_b"
+done
+[ -d "$CLUSTER_MPI_LIBDIR/openmpi" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_LIBDIR/openmpi"
+for _l in $SCIPMPI_CORELIBS $SCIPMPI_PMIXLIBS $SCIPMPI_PMIXDIRS; do
+    [ -e "$CLUSTER_MPI_LIBDIR/$_l" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_LIBDIR/$_l"
+done
+# Pin OpenMPI's install root so it locates its MCA components under the bound
+# tree instead of the container's (passed in via the APPTAINERENV_ prefix).
+export APPTAINERENV_OPAL_PREFIX="$CLUSTER_MPI_PREFIX"
+
+# ==========================================================================
+# BLOCK B — OpenMPI 5.x (PRRTE) — self-contained prefix, bind whole tree
+# ==========================================================================
+# 5.x is normally a self-contained prefix (module/spack/source), so binding the
+# whole tree is simplest and avoids guessing 5.x sonames. To use: comment out
+# ALL of BLOCK A above (down to its OPAL_PREFIX export), set CLUSTER_MPI_PREFIX
+# to your 5.x prefix, and uncomment these lines.
+#CLUSTER_MPI_PREFIX="/opt/openmpi-5.0.6"          # <- your 5.x module/spack prefix
+#SCIPMPI_CMD=" --bind /tmp --bind $CLUSTER_MPI_PREFIX "
+#export APPTAINERENV_OPAL_PREFIX="$CLUSTER_MPI_PREFIX"
+#export APPTAINERENV_PATH="$CLUSTER_MPI_PREFIX/bin:\$PATH"
+#export APPTAINERENV_LD_LIBRARY_PATH="$CLUSTER_MPI_PREFIX/lib:\$LD_LIBRARY_PATH"
+# If PMIx / PRRTE / libevent / hwloc live OUTSIDE the prefix (external packages),
+# bind them too. Find their paths with:
+#   ldd "$CLUSTER_MPI_PREFIX/bin/prterun" | grep -E 'pmix|prrte|event|hwloc'
 # END OF MPI CONFIGURATION VARIABLES
 ### END #######################################################################
 
@@ -315,5 +373,16 @@ SIF_PATH="$SCIPION_IMAGE_DIR/$IMAGE.sif"
 # ----------------------------
 # Launch container
 # ----------------------------
+# Only add the X11/GUI binds when a display is actually available. On headless
+# cluster compute nodes DISPLAY is unset, so the GUI flags (and the bind of
+# /tmp/.X11-unix, which may not exist there) are skipped. The same launcher
+# therefore works both on a workstation and under a batch/SLURM allocation.
+if [ -n "$DISPLAY" ]; then
+    RUN_GUI_CMD=("${GUI_CMD[@]}")
+else
+    RUN_GUI_CMD=()
+    echo "No DISPLAY detected: launching Scipion in headless mode (no GUI)."
+fi
+
 echo "Launching Scipion container for $CONTAINER_FLAVOUR"
-"${LAUNCH_CMD[@]}" "${GUI_CMD[@]}" "$SIF_PATH" /scipion/scipion3 "$@"
+"${LAUNCH_CMD[@]}" "${RUN_GUI_CMD[@]}" "$SIF_PATH" /scipion/scipion3 "$@"
