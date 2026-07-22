@@ -57,34 +57,34 @@ From: ./build/apptainer-base.sif
     ####################################################################################################################
     /scipion/scipion3 installp -p scipion-em-tomo
     /scipion/scipion3 installp -p scipion-em-imod
-#    /scipion/scipion3 installp -p scipion-em-aretomo
+    /scipion/scipion3 installp -p scipion-em-aretomo
     /scipion/scipion3 installp -p scipion-em-cistem
     /scipion/scipion3 installp -p scipion-em-cryocare
-#    /scipion/scipion3 installp -p scipion-em-deepfinder
-#    /scipion/scipion3 installp -p scipion-em-dynamo
-#    /scipion/scipion3 installp -p scipion-em-eman2
-#    /scipion/scipion3 installp -p scipion-em-emantomo
-#    /scipion/scipion3 installp -p scipion-em-fidder
-#
-#    # 1. Force Conda to detect CUDA 12.0 globally (this survives Scipion's isolated subshells)
-#    conda config --system --set override_virtual_packages.cuda "12.0"
-#
-#    # 2. Install GapStop
-#    /scipion/scipion3 installp -p scipion-em-gapstop
-#
-#    # 3. Clean up: Remove the override so the container reverts to normal CUDA 11.8 detection
-#    conda config --system --remove-key override_virtual_packages.cuda || true
-#
-#    /scipion/scipion3 installp -p scipion-em-membrain
-#    /scipion/scipion3 installp -p scipion-em-motioncorr
-#    /scipion/scipion3 installp -p scipion-em-novactf
-#    /scipion/scipion3 installp -p scipion-em-relion
-#    /scipion/scipion3 installp -p scipion-em-reliontomo
-#    /scipion/scipion3 installp -p scipion-em-sphire
-#    /scipion/scipion3 installp -p scipion-em-tardis
-#    /scipion/scipion3 installp -p scipion-em-tomo3d
-#    /scipion/scipion3 installp -p scipion-em-tomosegmemtv
-#    /scipion/scipion3 installp -p scipion-em-warp
+    /scipion/scipion3 installp -p scipion-em-deepfinder
+    /scipion/scipion3 installp -p scipion-em-dynamo
+    /scipion/scipion3 installp -p scipion-em-eman2
+    /scipion/scipion3 installp -p scipion-em-emantomo
+    /scipion/scipion3 installp -p scipion-em-fidder
+
+    # 1. Force Conda to detect CUDA 12.0 globally (this survives Scipion's isolated subshells)
+    conda config --system --set override_virtual_packages.cuda "12.0"
+
+    # 2. Install GapStop
+    /scipion/scipion3 installp -p scipion-em-gapstop
+
+    # 3. Clean up: Remove the override so the container reverts to normal CUDA 11.8 detection
+    conda config --system --remove-key override_virtual_packages.cuda || true
+
+    /scipion/scipion3 installp -p scipion-em-membrain
+    /scipion/scipion3 installp -p scipion-em-motioncorr
+    /scipion/scipion3 installp -p scipion-em-novactf
+    /scipion/scipion3 installp -p scipion-em-relion
+    /scipion/scipion3 installp -p scipion-em-reliontomo
+    /scipion/scipion3 installp -p scipion-em-sphire
+    /scipion/scipion3 installp -p scipion-em-tardis
+    /scipion/scipion3 installp -p scipion-em-tomo3d
+    /scipion/scipion3 installp -p scipion-em-tomosegmemtv
+    /scipion/scipion3 installp -p scipion-em-warp
     
     CONDA_HOOK_CMD='/opt/miniforge3/bin/conda shell.bash hook'
     eval "$($CONDA_HOOK_CMD)"    

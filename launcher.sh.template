@@ -110,7 +110,7 @@ export APPTAINERENV_MPLCONFIGDIR="$HOST_MPL_CACHE"
   # Scipion shuts down, freeing disk space on the node.
   # UNCOMMENT THE FOLLOWING LINES WHEN USING IT
 
-#HOST_MCR_CACHE="/tmp/mcr_cache_${USER}_$$"
+#HOST_MCR_CACHE="$SCIPION_PROJDIR/.mcr_cache_${USER}_$$"
 #mkdir -p "$HOST_MCR_CACHE"
 #export APPTAINERENV_MCR_CACHE_ROOT="$HOST_MCR_CACHE"
 #trap 'rm -rf "$HOST_MCR_CACHE"' EXIT
