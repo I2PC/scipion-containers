@@ -153,71 +153,73 @@ export APPTAINERENV_MPLCONFIGDIR="$HOST_MPL_CACHE"
 ### END #######################################################################
 
 ### Message Passing Interface (MPI)
-# Many programs (such as Relion & Xmipp) require MPI. RELION's *_mpi binaries
-# have NO bundled mpirun: they link against the system OpenMPI, so the whole
-# OpenMPI stack the container uses at run time must be ONE consistent set, and
-# it must match the OpenMPI generation the CONTAINER was built against.
+# Many programs (Relion, Xmipp, ...) use MPI. The MPI stack used at run time
+# must be ONE self-consistent set: mpirun + core libs + PMIx plugins that all
+# match each other. Pick ONE strategy below by (un)commenting.
 #
-# IMPORTANT: binding ONLY the OpenMPI plugin dir (the old behaviour) breaks
-# PMIx, because the bound plugins then resolve libpmix from the container
-# instead of from the host, giving:
-#     mca_pmix_ext3x.so: undefined symbol: PMIx_Info_create   (mpirun exit 127)
-# We therefore bind the COMPLETE host OpenMPI stack.
+#   BLOCK A (ACTIVE, default) — use the container's OWN OpenMPI.
+#     Correct for workstations and any SINGLE-NODE run (incl. single-node
+#     multi-GPU). Nothing MPI-related is bound from the host, so the container's
+#     mpirun, libs and PMIx components stay matched. This is also what avoids the
+#     crash:  mca_pmix_ext3x.so: undefined symbol: PMIx_Info_create  (exit 127)
+#     -- that was caused by the OLD config partially overwriting the container's
+#     MPI with host files (an incompatible mix of host plugins + container libpmix).
 #
-# Uncomment exactly ONE block below, matching your host AND the OpenMPI the
-# container was built with. Check on the target node with:  mpirun --version
-#   4.x -> uses ORTE (orted), libopen-rte / libopen-pal, libmpi.so.40  (BLOCK A)
-#   5.x -> uses PRRTE (prted/prterun), NO libopen-rte, different sonames, and
-#          PMIx is a separate library. The container's RELION must ALSO be a
-#          5.x build; a 4.x build will not load against 5.x.               (BLOCK B)
-#
-# CLUSTER_MPI_PREFIX: root of the OpenMPI installation the container must use.
+#   BLOCK B (commented) — use the HOST / cluster OpenMPI.
+#     Needed ONLY for MULTI-NODE MPI, where the container must use the cluster's
+#     process launcher / interconnect. Two HARD requirements:
+#       1) Generation match: the host OpenMPI must match the one the container's
+#          RELION was built against (4.x vs 5.x). Check: mpirun --version.
+#       2) Mount points must be creatable: binding a host file whose path does
+#          NOT already exist inside the (read-only) image fails with
+#          "destination ... doesn't exist in container" -- exactly the error you
+#          hit for /usr/lib/x86_64-linux-gnu/libpmix.so.2. Fix by enabling
+#          Apptainer overlay/underlay (admin: `enable underlay = yes`, or run
+#          with `--underlay`), or by binding only paths that already exist in
+#          the image.
+
+# ======================= BLOCK A: container's own MPI ======================
+# (workstation / single node) -- recommended default. /tmp is bound for MPI's
+# shared-memory session files.
+SCIPMPI_CMD=" --bind /tmp "
+
+# ================= BLOCK B: host / cluster MPI (multi-node) ================
+# To use: comment out BLOCK A's SCIPMPI_CMD above, then uncomment this block.
+# CLUSTER_MPI_PREFIX: root of the host/cluster OpenMPI installation.
 #   - Ubuntu/Debian system OpenMPI (apt):          /usr
 #   - Environment-module / spack / source build:   e.g. /opt/openmpi-5.0.6
-CLUSTER_MPI_PREFIX="/usr"
-
-# ==========================================================================
-# BLOCK A — OpenMPI 4.x  (ACTIVE) — system-package layout, bind pieces
-# ==========================================================================
-# On Ubuntu/Debian libs live in a multiarch subdir; on module installs, lib/.
-CLUSTER_MPI_BINDIR="$CLUSTER_MPI_PREFIX/bin"
-CLUSTER_MPI_LIBDIR="$CLUSTER_MPI_PREFIX/lib/x86_64-linux-gnu"   # module-style: use "$CLUSTER_MPI_PREFIX/lib"
-# Launcher binaries + core libs RELION links against + PMIx runtime deps its
-# plugins dlopen. Verify the versioned names on your host: ls "$CLUSTER_MPI_LIBDIR"
-# (pmix2 is a DIRECTORY: libpmix.so.2 is a symlink into it, so bind it too).
-SCIPMPI_BINS="mpirun orted mpiexec"
-SCIPMPI_CORELIBS="libmpi.so.40 libmpi_cxx.so.40 libopen-rte.so.40 libopen-pal.so.40"
-SCIPMPI_PMIXLIBS="libpmix.so.2 libevent_core-2.1.so.7 libhwloc.so.15"
-SCIPMPI_PMIXDIRS="pmix2"
-
-# Build the bind list (each piece is skipped if it does not exist on this host).
-SCIPMPI_CMD=" --bind /tmp "
-for _b in $SCIPMPI_BINS; do
-    [ -e "$CLUSTER_MPI_BINDIR/$_b" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_BINDIR/$_b"
-done
-[ -d "$CLUSTER_MPI_LIBDIR/openmpi" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_LIBDIR/openmpi"
-for _l in $SCIPMPI_CORELIBS $SCIPMPI_PMIXLIBS $SCIPMPI_PMIXDIRS; do
-    [ -e "$CLUSTER_MPI_LIBDIR/$_l" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_LIBDIR/$_l"
-done
-# Pin OpenMPI's install root so it locates its MCA components under the bound
-# tree instead of the container's (passed in via the APPTAINERENV_ prefix).
-export APPTAINERENV_OPAL_PREFIX="$CLUSTER_MPI_PREFIX"
-
-# ==========================================================================
-# BLOCK B — OpenMPI 5.x (PRRTE) — self-contained prefix, bind whole tree
-# ==========================================================================
-# 5.x is normally a self-contained prefix (module/spack/source), so binding the
-# whole tree is simplest and avoids guessing 5.x sonames. To use: comment out
-# ALL of BLOCK A above (down to its OPAL_PREFIX export), set CLUSTER_MPI_PREFIX
-# to your 5.x prefix, and uncomment these lines.
-#CLUSTER_MPI_PREFIX="/opt/openmpi-5.0.6"          # <- your 5.x module/spack prefix
-#SCIPMPI_CMD=" --bind /tmp --bind $CLUSTER_MPI_PREFIX "
+#CLUSTER_MPI_PREFIX="/usr"
+#CLUSTER_MPI_BINDIR="$CLUSTER_MPI_PREFIX/bin"
+#CLUSTER_MPI_LIBDIR="$CLUSTER_MPI_PREFIX/lib/x86_64-linux-gnu"   # module-style: "$CLUSTER_MPI_PREFIX/lib"
+#
+# -- OpenMPI 4.x (ORTE): verify the versioned names with: ls "$CLUSTER_MPI_LIBDIR"
+#    (pmix2 is a DIRECTORY: libpmix.so.2 is a symlink into it, so bind it too).
+#SCIPMPI_BINS="mpirun orted mpiexec"
+#SCIPMPI_CORELIBS="libmpi.so.40 libmpi_cxx.so.40 libopen-rte.so.40 libopen-pal.so.40"
+#SCIPMPI_PMIXLIBS="libpmix.so.2 libevent_core-2.1.so.7 libhwloc.so.15"
+#SCIPMPI_PMIXDIRS="pmix2"
+# -- OpenMPI 5.x (PRRTE): NO libopen-rte; prted/prterun instead of orted;
+#    different sonames. Simplest is to bind the whole self-contained prefix and
+#    skip the per-file loops below:
+#      SCIPMPI_CMD=" --bind /tmp --bind $CLUSTER_MPI_PREFIX "
+#      export APPTAINERENV_OPAL_PREFIX="$CLUSTER_MPI_PREFIX"
+#      export APPTAINERENV_PATH="$CLUSTER_MPI_PREFIX/bin:\$PATH"
+#      export APPTAINERENV_LD_LIBRARY_PATH="$CLUSTER_MPI_PREFIX/lib:\$LD_LIBRARY_PATH"
+#    (find any external PMIx/PRRTE/libevent/hwloc with:
+#       ldd "$CLUSTER_MPI_PREFIX/bin/prterun" | grep -E 'pmix|prrte|event|hwloc')
+#
+# Build the bind list (each piece is skipped if missing on the host; remember
+# requirement 2 above -- the destination must also exist in the image or overlay
+# must be enabled):
+#SCIPMPI_CMD=" --bind /tmp "
+#for _b in $SCIPMPI_BINS; do
+#    [ -e "$CLUSTER_MPI_BINDIR/$_b" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_BINDIR/$_b"
+#done
+#[ -d "$CLUSTER_MPI_LIBDIR/openmpi" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_LIBDIR/openmpi"
+#for _l in $SCIPMPI_CORELIBS $SCIPMPI_PMIXLIBS $SCIPMPI_PMIXDIRS; do
+#    [ -e "$CLUSTER_MPI_LIBDIR/$_l" ] && SCIPMPI_CMD+=" --bind $CLUSTER_MPI_LIBDIR/$_l"
+#done
 #export APPTAINERENV_OPAL_PREFIX="$CLUSTER_MPI_PREFIX"
-#export APPTAINERENV_PATH="$CLUSTER_MPI_PREFIX/bin:\$PATH"
-#export APPTAINERENV_LD_LIBRARY_PATH="$CLUSTER_MPI_PREFIX/lib:\$LD_LIBRARY_PATH"
-# If PMIx / PRRTE / libevent / hwloc live OUTSIDE the prefix (external packages),
-# bind them too. Find their paths with:
-#   ldd "$CLUSTER_MPI_PREFIX/bin/prterun" | grep -E 'pmix|prrte|event|hwloc'
 # END OF MPI CONFIGURATION VARIABLES
 ### END #######################################################################
 
