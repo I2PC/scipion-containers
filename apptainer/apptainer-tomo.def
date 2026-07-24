@@ -119,8 +119,22 @@ From: ./build/apptainer-base.sif
         chmod -R 755 "$TARDIS_HOME"
 
         conda activate tardis-0.3.10
-        
-        
+
+        # --- Align PyTorch with the container's CUDA 12.4 base ---
+        # TARDIS only requires "torch>2.0.0" (no CUDA pin), so a plain install
+        # pulls the newest wheel, which may cause errors of type Torch
+        # reports "driver too old", disables CUDA and silently runs on CPU.
+        # Reinstall a CUDA 12.4 build (2.6.0 is the newest torch shipping cu124
+        # wheels) so it matches the CUDA 12.4 base image and runs on any driver
+        # >= 12.4. The "+cu124" local tag exists only on the PyTorch index, so
+        # the pin is unambiguous; PyPI provides the pure-Python dependencies.
+        echo "-> Reinstalling PyTorch (CUDA 12.4 build) for TARDIS GPU support..."
+        pip install --force-reinstall "torch==2.6.0+cu124" \
+            --index-url https://download.pytorch.org/whl/cu124 \
+            --extra-index-url https://pypi.org/simple
+        # Sanity check: torch must report it was built against CUDA 12.4.
+        python -c "import torch; print('-> TARDIS torch', torch.__version__, 'CUDA build', torch.version.cuda)"
+
         echo "--> Downloading Microtubules models..."
 	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('fnet_attn','32','microtubules_3d')"
 	HOME="$TARDIS_HOME" python -c "from tardis_em.utils.aws import get_weights_aws; get_weights_aws('dist','triang','2d')"
