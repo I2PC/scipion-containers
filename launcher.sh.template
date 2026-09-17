@@ -57,8 +57,8 @@ export CRYOSPARC_PASSWORD="password"
 
 
 ### CRYOASSESS
-# Point to your CryoAssess models folder 
-$SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
+# Point to your CryoAssess models folder
+SCIPCRYOASSESS_MODELS="/route/to/your/cryoassess_models_folder"
 
 # UNCOMMENT THIS LINE WHEN USING CRYOASSESS
 #$SCIPCRYOASSESS_CMD=" --bind $SCIPCRYOASSESS_MODELS:/scipion/software/em/cryoassess_models "
@@ -128,6 +128,37 @@ SCIPMPI_CMD=" --bind $SCIPMPI_LIB --bind /tmp "
 # END OF MPI CONFIGURATION VARIABLES
 ### END #######################################################################
 
+### Known container environment workarounds (apply on every launch, no per-protocol fix needed)
+# These paths are baked into the apptainer-spa image itself (not host-specific),
+# so they are valid on any deployment of the same image. See workflow_solved.md
+# bugs 6, 7 and 9 for the full diagnosis of each one.
+#
+# Bug 6: launcher.sh binds the HOST's OpenMPI (SCIPMPI_CMD below) over the
+# container's own, for real multi-node clusters. On a single workstation
+# without a matching host glibc, this breaks 'mpirun' for Relion's MPI
+# protocols ("mpirun: symbol lookup error: ... undefined symbol: PMIx_Info_create").
+# Point Relion's MPI launcher at a self-contained conda env's mpirun instead.
+SCIP_PARALLEL_COMMAND_RELION="/opt/miniforge3/envs/cryolo-1.9.9/bin/mpirun -np %(JOB_NODES)d %(COMMAND)s"
+
+# Bug 7: the 'xmipp_MicCleaner' conda env (used by XmippProtDeepMicrographScreen)
+# is missing libgfortran.so.4 in its own lib dir (only has .so.5). The image
+# happens to bundle a compatible copy elsewhere (used by other envs) - add it
+# to LD_LIBRARY_PATH so scipy/skimage can find it without touching any envs
+# that already resolve their own gfortran correctly (LD_LIBRARY_PATH is only
+# consulted as a fallback after RPATH/RUNPATH).
+SCIP_EXTRA_LD_LIBRARY_PATH="/opt/miniforge3/pkgs/libgfortran4-7.5.0-h14aa051_20/lib"
+
+# Bug 9: XmippProtClassifyPcaStreaming's own code wipes LD_LIBRARY_PATH to ''
+# before running its PyTorch/CUDA step (to isolate that conda env), which also
+# erases the NVIDIA driver paths --nv injects, breaking torch.cuda entirely
+# ("Found no NVIDIA driver") and, once that's preloaded, cuBLAS init
+# ("CUBLAS_STATUS_NOT_INITIALIZED", needs the JIT compiler too). LD_PRELOAD
+# survives that wipe (the protocol code never touches it), so preload the
+# driver libs by absolute path - harmless for any process that doesn't need
+# CUDA, since these are stable, uniquely-named NVIDIA driver libraries.
+SCIP_LD_PRELOAD_NVIDIA="/.singularity.d/libs/libcuda.so.1:/.singularity.d/libs/libnvidia-ml.so.1:/.singularity.d/libs/libnvidia-ptxjitcompiler.so.1"
+### END KNOWN WORKAROUNDS #####################################################
+
 ### Apptainer directories configuration
 # Define where Apptainer stores data:
 # - APPTAINER_CACHEDIR: base directory where Apptainer will create its internal cache folder (e.g. ~/containers)
@@ -143,16 +174,38 @@ mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
 ###
 #### END OF USER CONFIGURABLE VARIABLES
 
-# Launching command
-# GUI is not always an option in compute nodes, thus X11 does not need to be there always
-LAUNCH_CMD="apptainer exec --nv --containall \
-            --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
-            --bind $SCIPION_PROJDIR/logs:/logs \
-            --bind /run --bind /etc/resolv.conf \
-            --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
-            $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $SCIPCHIMERA_CMD "
+### Apptainer instance
+# All launcher.sh invocations for a given flavour share ONE persistent Apptainer
+# instance instead of each starting/tearing down its own container. This matters
+# for 'scipion3 template': it launches the actual protocol scheduler and the
+# project GUI as *detached* background subprocesses without waiting for them
+# (scipion-app/scipion/scripts/kickoff.py, createProjectFromWorkflow()). With a
+# one-shot 'apptainer exec', those subprocesses get killed the moment the
+# invoked command returns, leaving protocols stuck as "scheduled" forever.
+# The instance keeps running (and keeps those subprocesses alive) until you
+# stop it yourself with:
+#   bash launcher.sh --stop-instance
+INSTANCE_NAME="scipion-$CONTAINER_FLAVOUR"
 
 # Do not touch below here unless you know what you are doing!
+
+# apptainer instance start/stop needs to talk to the user's systemd --user
+# session over D-Bus to manage the instance's cgroup (rootless cgroups v2).
+# DBUS_SESSION_BUS_ADDRESS may already point elsewhere (e.g. the desktop
+# session bus under a GNOME login), which makes it fail with
+# "could not detect the OwnerUID". Point it explicitly at the systemd user
+# bus if that socket exists.
+if [[ -S "/run/user/$(id -u)/bus" ]]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+fi
+
+# Let the user stop the persistent instance without touching anything else
+if [[ "$1" == "--stop-instance" ]]; then
+    echo "Stopping Apptainer instance '$INSTANCE_NAME'..."
+    apptainer instance stop "$INSTANCE_NAME"
+    exit $?
+fi
+
 echo "Preparing to launch Scipion Container"
 REGISTRY="rinchen.cnb.csic.es"
 IMAGE="apptainer-$CONTAINER_FLAVOUR"
@@ -173,12 +226,24 @@ UPDATE_NEEDED=0
 # ----------------------------
 # Fetch remote tags and latest numeric version
 # ----------------------------
-TAGS=$(curl -s -u guest:guest "https://$REGISTRY/v2/scipion/$IMAGE/tags/list" | jq -r '.tags[]')
+TAGS=$(curl -sf -u guest:guest "https://$REGISTRY/v2/scipion/$IMAGE/tags/list" | jq -r '.tags[]')
+CURL_STATUS=$?
 LATEST_NUMERIC=$(echo "$TAGS" | grep -E '^[0-9]+$' | sort -V | tail -n1)
 
 # Read installed latest numeric version
 INSTALLED_VERSION=""
 [[ -f "$VERSION_FILE" ]] && INSTALLED_VERSION=$(cat "$VERSION_FILE")
+
+if [[ $CURL_STATUS -ne 0 || -z "$LATEST_NUMERIC" ]]; then
+    echo "Warning: could not reach the registry ($REGISTRY) to check for updates (network issue or an expired/invalid TLS certificate on the server)."
+    if [[ -n "$INSTALLED_VERSION" || -f "$SIF_PATH" ]]; then
+        echo "Continuing with the locally installed image."
+        LATEST_NUMERIC="$INSTALLED_VERSION"
+    else
+        echo "No local image found either. Fix connectivity to $REGISTRY and try again."
+        exit 1
+    fi
+fi
 
 # ----------------------------
 # Decide whether to download/update
@@ -248,8 +313,64 @@ if [[ $UPDATE_NEEDED -eq 1 ]]; then
 fi
 
 # ----------------------------
-# Launch container
+# Start (or reuse) the persistent instance
 # ----------------------------
-echo "Launching Scipion container for $CONTAINER_FLAVOUR"
-GUI_CMD=" --env DISPLAY=$DISPLAY --bind /tmp/.X11-unix "
-$LAUNCH_CMD $GUI_CMD "$SIF_PATH" /scipion/scipion3 "$@"
+INSTANCE_RUNNING=0
+if apptainer instance list "$INSTANCE_NAME" 2>/dev/null | awk 'NR>1 {print $1}' | grep -qx "$INSTANCE_NAME"; then
+    INSTANCE_RUNNING=1
+fi
+
+if [[ $INSTANCE_RUNNING -eq 1 && $UPDATE_NEEDED -eq 1 ]]; then
+    echo "A newer image was just downloaded, but instance '$INSTANCE_NAME' is still running the old one."
+    read -p "Stop it and start a fresh instance with the new image? Y/n: " -r
+    if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]; then
+        apptainer instance stop "$INSTANCE_NAME"
+        INSTANCE_RUNNING=0
+    fi
+fi
+
+if [[ $INSTANCE_RUNNING -eq 0 ]]; then
+    echo "Starting persistent Scipion instance '$INSTANCE_NAME' for $CONTAINER_FLAVOUR"
+    # shellcheck disable=SC2086
+    apptainer instance start --nv --containall \
+                --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+                --env DISPLAY=$DISPLAY \
+                --bind $SCIPION_PROJDIR/logs:/logs \
+                --bind /run --bind /etc/resolv.conf \
+                --bind /tmp/.X11-unix \
+                --bind $SCIPION_DATADIR:/data --bind $SCIPION_PROJDIR \
+                $SCIPCRYOSPARC_CMD $SCIPCRYOASSESS_CMD $SCIPPHENIX_CMD $SCIPSLURM_CMD $SCIPMPI_CMD $SCIPCHIMERA_CMD \
+                "$SIF_PATH" "$INSTANCE_NAME"
+else
+    echo "Reusing already-running instance '$INSTANCE_NAME'."
+fi
+
+# ----------------------------
+# Run the requested command inside the instance
+# ----------------------------
+# Note: this 'exec' returning does NOT stop the instance (unlike a plain
+# 'apptainer exec <image>'), so background processes started inside it (e.g.
+# the Scipion scheduler) keep running. Stop the instance explicitly with:
+#   bash launcher.sh --stop-instance
+#
+# IMPORTANT: 'apptainer exec instance://name' does NOT inherit the --env
+# variables passed to 'apptainer instance start' (those only apply to the
+# instance's own startup process) - bind mounts persist across execs, but
+# environment variables must be re-specified on every exec. Without
+# SCIPION_USER_DATA here, Scipion silently falls back to its default
+# $HOME/ScipionUserData, which under --containall is an ephemeral ~64MB
+# tmpfs (not the real, bound project directory) - projects "run" there and
+# vanish the moment the instance stops.
+#
+# LD_LIBRARY_PATH is set via 'export' inside the exec'd shell (not --env)
+# so it APPENDS to whatever the container already has, instead of replacing
+# it outright - only the known-missing libgfortran dir is added on top.
+echo "Running inside Scipion instance '$INSTANCE_NAME'"
+apptainer exec \
+    --env SCIPION_USER_DATA=$SCIPION_PROJDIR \
+    --env DISPLAY=$DISPLAY \
+    --env PARALLEL_COMMAND_RELION="$SCIP_PARALLEL_COMMAND_RELION" \
+    --env LD_PRELOAD="$SCIP_LD_PRELOAD_NVIDIA" \
+    --env SCIP_EXTRA_LD_LIBRARY_PATH="$SCIP_EXTRA_LD_LIBRARY_PATH" \
+    instance://"$INSTANCE_NAME" \
+    bash -c 'export LD_LIBRARY_PATH="$SCIP_EXTRA_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"; exec /scipion/scipion3 "$@"' _ "$@"
