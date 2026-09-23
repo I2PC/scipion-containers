@@ -42,11 +42,16 @@ mkdir -p $SCIPION_PROJDIR/logs
 ### END #######################################################################
 
 
-### MATPLOTLIB RUNTIME CACHE
-# We use the persistent PROJDIR so that source files don't need to be
-# recalculated every time Scipion is launched.
-HOST_MPL_CACHE="$SCIPION_PROJDIR/.cache/matplotlib"
-mkdir -p "$HOST_MPL_CACHE"
+### RUNTIME CACHES (XDG + MATPLOTLIB)
+# The image bakes XDG_CACHE_HOME=/opt/cache into its %environment, but at
+# runtime the SIF is READ-ONLY, so any tool that writes there fails (e.g.
+# ChimeraX: "Unable to make user's cache directory: Read-only file system:
+# /opt/cache/ChimeraX"). Redirect XDG_CACHE_HOME to a writable host location
+# under the (bind-mounted) PROJDIR so caches persist between launches.
+HOST_XDG_CACHE="$SCIPION_PROJDIR/.cache"
+HOST_MPL_CACHE="$HOST_XDG_CACHE/matplotlib"
+mkdir -p "$HOST_XDG_CACHE" "$HOST_MPL_CACHE"
+export APPTAINERENV_XDG_CACHE_HOME="$HOST_XDG_CACHE"
 export APPTAINERENV_MPLCONFIGDIR="$HOST_MPL_CACHE"
 ### END #######################################################################
 
