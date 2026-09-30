@@ -99,6 +99,16 @@ export APPTAINERENV_LD_LIBRARY_PATH="$GL_OVERRIDE_DIR"
 #export CHIMERA_LOCATION="/scipion/software/em/chimerax-X.X.X"
 # SCIPCHIMERA_CMD=" --bind $CHIMERA_HOME:$CHIMERA_LOCATION --env CHIMERA_HOME=$CHIMERA_LOCATION"
 
+  # OPTIONAL WORKAROUND (only needed if the image was NOT rebuilt with libxcb-cursor0):
+  # ChimeraX >= 1.6 bundles Qt 6.5+, whose xcb platform plugin needs libxcb-cursor0.
+  # If you see "no Qt platform plugin could be initialized", bind the host copy in.
+  # Safe only when host and container share the same distro/glibc (both Ubuntu 22.04).
+  # UNCOMMENT THE FOLLOWING LINES TO USE THE WORKAROUND
+#HOST_XCB_CURSOR="$(ldconfig -p | awk '/libxcb-cursor\.so\.0/{print $NF; exit}')"
+#if [ -n "$HOST_XCB_CURSOR" ]; then
+#    SCIPCHIMERA_CMD+=" --bind $HOST_XCB_CURSOR:/usr/lib/x86_64-linux-gnu/libxcb-cursor.so.0"
+#fi
+
   ### CHIMERAX END
 ### END #######################################################################
 

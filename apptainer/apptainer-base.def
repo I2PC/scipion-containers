@@ -40,7 +40,10 @@ apt install -y --no-install-recommends --no-install-suggests libfftw3-dev libhdf
 apt install -y --no-install-recommends --no-install-suggests libmunge-dev libmunge2 munge
 #apt install -y --no-install-recommends --no-install-suggests unzip build-essential fakeroot devscripts equivs libjwt-dev libgtk2.0-dev libhwloc-dev libbpf-dev libdbus-1-dev libmunge-dev libmunge2 munge libyaml-0-2 libyaml-dev libjson-c-dev libhttp-parser-dev python-is-python3
 # ChimeraX libraries
-apt-get install -y xcb libffi-dev libxcb1-dev libxkbfile-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
+# NOTE: libxcb-cursor0 is required by the Qt xcb platform plugin from Qt >= 6.5.0
+# (ChimeraX >= 1.6 bundles PyQt6/Qt 6.5+). Without it the bundled ChimeraX fails
+# with "no Qt platform plugin could be initialized" even though 'xcb' is listed.
+apt-get install -y xcb libffi-dev libxcb1-dev libxcb-cursor0 libxkbfile-dev qtbase5-dev libglu1-mesa libcanberra-gtk-module libcanberra-gtk3-module packagekit-gtk3-module
 
 # Create a user for SLURM
 adduser slurm
