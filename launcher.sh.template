@@ -30,8 +30,15 @@ $PREPARE_SCREEN
 
 
 ### STORAGE DIRECTORIES
-# The datadir will be used to input the RAW data used for processing, ie movies/tiltseries
+# The datadir will be used to input the RAW data used for processing, ie movies/tiltseries, /data, etc.
 SCIPION_DATADIR="/path/to/your/data/folder"
+# 1. Resolve the path dynamically (needed for links)
+REAL_DATADIR=$(realpath "$SCIPION_DATADIR")
+# 2. Validate the mount exists on the compute node
+if [ ! -d "$REAL_DATADIR" ]; then
+    echo "Error: The mounted disk ($REAL_DATADIR) is not accessible on this compute node."
+    exit 1
+fi
 # The projdir will house Scipion's project and all of its intermediate data
 SCIPION_PROJDIR="/path/to/your/ScipionUserData"
 # Define your local tests directory
@@ -295,7 +302,7 @@ LAUNCH_CMD=(
   --bind "$SCIPION_PROJDIR/logs:/logs"
   --bind /run
   --bind /etc/resolv.conf
-  --bind "$SCIPION_DATADIR:/data"
+  --bind "$REAL_DATADIR:/data"
   --bind "$SCIPION_PROJDIR"
   --bind "$SCIPION_LOCAL_TESTS"
   $SCIPCRYOSPARC_CMD

@@ -77,8 +77,13 @@ sed -i '/^SCIPION_USER_DATA/d' /scipion/config/scipion.conf
 echo "SCIPION_LOG = ${SCIPION_USER_DATA}/logs/scipion.log" >> /scipion/config/scipion.conf
 echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 
-# Scipion font fix
-/scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_*"
+# Scipion font fix and explicitly locks Python to CPython to prevent the Conda dependency solver decides the "best" way to resolve the environment is to entirely uninstall standard Python (cpython) and replace it with graalpy
+/scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_* python=3.8.*=*cpython*"
+
+# GraalPy (the Python implementation for GraalVM) often has compatibility issues with libraries that rely on C extensions, such as NumPy.
+# (/opt/miniforge3/envs/scipion3/lib/jvm/graalvm.../languages/python/...)
+# To fix this, you should force a reinstallation of NumPy in your environment so that the correct standard CPython version is downloaded and/or compiled.
+/scipion/scipion3 run conda install -y --force-reinstall -c conda-forge numpy=1.24.4 python=3.8.*=*cpython*
 
 # Basic programs:
 # Xmipp: if the installation fails, it finds the CMakeError.log and prints it on the terminal
