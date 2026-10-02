@@ -66,9 +66,13 @@ echo 'export PATH="/opt/miniforge3/bin:${PATH}"' >> $SINGULARITY_ENVIRONMENT
 . /opt/miniforge3/etc/profile.d/conda.sh
 export PATH="/opt/miniforge3/bin:${PATH}"
 
+# Python version for the Scipion conda environment. Used by the installer and by
+# the CPython lock / NumPy reinstall steps below — keep all three in sync here.
+PYTHON_VERSION=3.11
+
 # Scipion installation
 conda run -n base pip3 install --user scipion-installer scons numpy
-conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion -python 3.11
+conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion -python ${PYTHON_VERSION}
 /scipion/scipion3 run conda install -c conda-forge libstdcxx-ng
 
 # Scipion configuration
@@ -86,12 +90,12 @@ echo "SCIPION_LOG = ${SCIPION_USER_DATA}/logs/scipion.log" >> /scipion/config/sc
 echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 
 # Scipion font fix and explicitly locks Python to CPython to prevent the Conda dependency solver decides the "best" way to resolve the environment is to entirely uninstall standard Python (cpython) and replace it with graalpy
-/scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_* python=3.8.*=*cpython*"
+/scipion/scipion3 run "conda install -y -c conda-forge tk=*=xft_* python=${PYTHON_VERSION}.*=*cpython*"
 
 # GraalPy (the Python implementation for GraalVM) often has compatibility issues with libraries that rely on C extensions, such as NumPy.
 # (/opt/miniforge3/envs/scipion3/lib/jvm/graalvm.../languages/python/...)
 # To fix this, you should force a reinstallation of NumPy in your environment so that the correct standard CPython version is downloaded and/or compiled.
-/scipion/scipion3 run conda install -y --force-reinstall -c conda-forge numpy=1.24.4 python=3.8.*=*cpython*
+/scipion/scipion3 run conda install -y --force-reinstall -c conda-forge numpy=1.24.4 python=${PYTHON_VERSION}.*=*cpython*
 
 # Basic programs:
 # Xmipp: if the installation fails, it finds the CMakeError.log and prints it on the terminal
