@@ -6,6 +6,9 @@
 #   Lola Sánchez @ CNB-CSIC - md.sanchez@cnb.csic.es
 #   Irene Sánchez @ CNB-CSIC - isanchez@cnb.csic.es
 #
+# HOST REQUIREMENTS (NVIDIA driver, host glibc/OS ceiling, display, Apptainer):
+#   see HOST_REQUIREMENTS.md in this repository before running on a new machine.
+#
 
 #### USER CONFIGURABLE VARIABLES
 ###
@@ -63,35 +66,17 @@ export APPTAINERENV_MPLCONFIGDIR="$HOST_MPL_CACHE"
 ### END #######################################################################
 
 
-### GL / glibc fix for --nv on newer hosts (e.g. Ubuntu 24.04)
-# --nv injects the HOST's libglvnd (libGLdispatch.so.0 / libGLX.so.0) into
-# /.singularity.d/libs. On a host newer than the container (built on Ubuntu
-# 22.04, glibc 2.35) those host libs require GLIBC_2.38+, which the container
-# does not provide, breaking any GL-linked binary. The symptom is IMOD's
-# batchruntomo failing at the cross-correlation step with:
-#   processchunks: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.38' not
-#   found (required by /.singularity.d/libs/libGLdispatch.so.0)
-#
-# The container ships its own (glibc-2.35) glvnd, so it just needs to win over
-# the injected host copy. IMPORTANT: do NOT achieve that by prepending all of
-# /usr/lib/x86_64-linux-gnu -- the cudnn-devel base also ships SYSTEM cudnn there
-# (libcudnn_graph.so.9). Prepending it globally puts system cudnn ahead of the
-# cudnn bundled inside GPU-plugin conda envs (torch finds its own via RUNPATH,
-# which is searched AFTER LD_LIBRARY_PATH), aborting them with:
-#   Could not load symbol cudnnGetLibConfig ... undefined symbol (exit 134)
-# (seen in membrain; would also hit tardis/relion/etc.).
-#
-# So expose ONLY the container's glvnd GL libs through a dedicated directory of
-# symlinks and prepend just that. System cudnn keeps its normal (lower, ld.so
-# cache) precedence, so conda envs keep loading their own cudnn via RUNPATH.
-# The dir lives under SCIPION_PROJDIR, which is bound 1:1 into the container, so
-# the symlinks (targets are container paths) resolve to the container's glvnd.
-GL_OVERRIDE_DIR="$SCIPION_PROJDIR/.gl_override"
-mkdir -p "$GL_OVERRIDE_DIR"
-for _gl in libGLdispatch.so.0 libGLX.so.0 libGL.so.1 libOpenGL.so.0 libEGL.so.1; do
-    ln -sf "/usr/lib/x86_64-linux-gnu/$_gl" "$GL_OVERRIDE_DIR/$_gl"
-done
-export APPTAINERENV_LD_LIBRARY_PATH="$GL_OVERRIDE_DIR"
+### GL / glibc note (no action needed with the 24.04 base)
+# Older 22.04-based images needed a "GL_OVERRIDE_DIR" hack here: --nv injects the
+# HOST's libglvnd (libGLdispatch.so.0 / libGLX.so.0), and on a host newer than the
+# container those require GLIBC_2.38+, which a glibc-2.35 (22.04) container lacks,
+# crashing every GL binary (IMOD batchruntomo, ChimeraX, etc.) with
+#   version `GLIBC_2.38' not found (required by .../libGLdispatch.so.0)
+# That workaround proved unreliable (on true 24.04 hosts the container glvnd failed
+# to win the loader search, so GL still crashed). The base is now built on Ubuntu
+# 24.04 (glibc 2.39 >= host), so the injected host GLVND loads natively and no
+# override is needed. If a base OLDER than a target host is ever reintroduced, the
+# real fix is to match the base to the newest host OS, not to re-add the override.
 ### END #######################################################################
 
 
@@ -258,8 +243,7 @@ SCIPMPI_CMD=" --bind /tmp "
 #      SCIPMPI_CMD=" --bind /tmp --bind $CLUSTER_MPI_PREFIX "
 #      export APPTAINERENV_OPAL_PREFIX="$CLUSTER_MPI_PREFIX"
 #      export APPTAINERENV_PATH="$CLUSTER_MPI_PREFIX/bin:\$PATH"
-#      # keep $GL_OVERRIDE_DIR first so the GL/glibc fix above is NOT clobbered
-#      export APPTAINERENV_LD_LIBRARY_PATH="$GL_OVERRIDE_DIR:$CLUSTER_MPI_PREFIX/lib"
+#      export APPTAINERENV_LD_LIBRARY_PATH="$CLUSTER_MPI_PREFIX/lib"
 #    (find any external PMIx/PRRTE/libevent/hwloc with:
 #       ldd "$CLUSTER_MPI_PREFIX/bin/prterun" | grep -E 'pmix|prrte|event|hwloc')
 #

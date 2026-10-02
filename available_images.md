@@ -1,8 +1,12 @@
 # List of plugins per image
+
+> Host machine requirements for running these images (driver, glibc/OS, display, …):
+> see [HOST_REQUIREMENTS.md](HOST_REQUIREMENTS.md).
+
 |                                	|               **scipion-base**              	| **scipion-spa** 	| **scipion-tomo** 	| 
 |--------------------------------	|:-------------------------------------------:	|:---------------:	|:----------------:	|
-| **Image base**                 	| nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 	|   scipion-base  	|   scipion-base   	|
-| **CUDA**                       	|                    11.8.0                   	|      11.8.0     	|      11.8.0      	|
+| **Image base**                 	| nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04 	|   scipion-base  	|   scipion-base   	|
+| **CUDA**                       	|                    12.6.3                   	|      12.6.3     	|      12.6.3      	|
 | **OpenCV**                     	|                      -                      	|        -        	|         -        	|
 | **scipion-em-aretomo**         	|                      -                      	|        -        	|         X        	|
 | **scipion-em-atomstructutils** 	|                      -                      	|        -        	|         -        	|
