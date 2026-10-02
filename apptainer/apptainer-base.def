@@ -68,7 +68,7 @@ export PATH="/opt/miniforge3/bin:${PATH}"
 
 # Scipion installation
 conda run -n base pip3 install --user scipion-installer scons numpy
-conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion
+conda run -n base python3 -m scipioninstaller -conda -noAsk /scipion -python 3.11
 /scipion/scipion3 run conda install -c conda-forge libstdcxx-ng
 
 # Scipion configuration
@@ -101,6 +101,27 @@ echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 # /scipion/scipion3 installb deepLearningToolkit
 
 ln -s /usr/lib/x86_64-linux-gnu/libffi.so /usr/lib/x86_64-linux-gnu/libffi.so.6
+
+# Install a collector that prints this image's installed program versions
+# (Scipion stack + system). build.sh runs it after the build and appends the
+# output to build/apptainer-<flavour>-version, so each version file records the
+# exact stack the image ships. It queries the live image, so flavours that
+# inherit it from base report their own full plugin set.
+cat > /opt/print-image-versions.sh <<'VEOF'
+#!/bin/sh
+echo "[system]"
+( . /etc/os-release 2>/dev/null && echo "OS: $PRETTY_NAME" )
+echo "CUDA: $(readlink -f /usr/local/cuda 2>/dev/null | sed 's#.*/##')"
+echo "Python: $(python3 --version 2>&1)"
+echo "Conda: $(conda --version 2>/dev/null)"
+echo
+echo "[scipion core]"
+/scipion/scipion3 version 2>/dev/null
+echo
+echo "[scipion / xmipp packages]"
+/scipion/scipion3 pip list 2>/dev/null | grep -iE 'scipion|xmipp' | sort
+VEOF
+chmod +x /opt/print-image-versions.sh
 
 # Cleaning tasks for space optimisation
 apt clean

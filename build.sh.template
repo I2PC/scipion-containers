@@ -52,7 +52,15 @@ for F in $CONTAINER_FLAVOURS; do
     OUT_SIF="$SCIPION_IMAGE_DIR/$TARGET.sif"
     DEF_FILE="apptainer/$TARGET.def"
     APPTAINERENV_DISPLAY=$DISPLAY apptainer build --nv --force --tmpdir "$APPTAINER_TMPDIR" "$OUT_SIF" "$DEF_FILE"
-    # Create a version file for each flavour
-    echo "$VERSION" > "$SCIPION_IMAGE_DIR/$TARGET-version"
+    # Version file for each flavour: the date stamp followed by the installed
+    # program versions, collected from the freshly built image by the collector
+    # that apptainer/<flavour>.def drops at /opt/print-image-versions.sh.
+    VERSION_FILE="$SCIPION_IMAGE_DIR/$TARGET-version"
+    echo "$VERSION" > "$VERSION_FILE"
+    if apptainer exec "$OUT_SIF" sh -c '[ -f /opt/print-image-versions.sh ]' 2>/dev/null; then
+        echo "# installed program versions ($(date -u +%Y-%m-%dT%H:%M:%SZ) UTC):" >> "$VERSION_FILE"
+        apptainer exec "$OUT_SIF" sh /opt/print-image-versions.sh >> "$VERSION_FILE" 2>/dev/null \
+            || echo "# (version collection failed)" >> "$VERSION_FILE"
+    fi
 done
 echo "Finished."

@@ -259,6 +259,28 @@ EOF
     fi
 
     ####################################################################################################################
+    # Refresh the installed-versions collector (inherited from base) so the tomo
+    # image's build/apptainer-tomo-version records the full tomo stack. build.sh
+    # runs /opt/print-image-versions.sh after the build to populate that file; it
+    # queries the live image, so it lists base + tomo plugins automatically.
+    ####################################################################################################################
+cat > /opt/print-image-versions.sh <<'VEOF'
+#!/bin/sh
+echo "[system]"
+( . /etc/os-release 2>/dev/null && echo "OS: $PRETTY_NAME" )
+echo "CUDA: $(readlink -f /usr/local/cuda 2>/dev/null | sed 's#.*/##')"
+echo "Python: $(python3 --version 2>&1)"
+echo "Conda: $(conda --version 2>/dev/null)"
+echo
+echo "[scipion core]"
+/scipion/scipion3 version 2>/dev/null
+echo
+echo "[scipion / xmipp packages]"
+/scipion/scipion3 pip list 2>/dev/null | grep -iE 'scipion|xmipp' | sort
+VEOF
+chmod +x /opt/print-image-versions.sh
+
+    ####################################################################################################################
     # Some cleaning
     ####################################################################################################################
     apt-get clean
