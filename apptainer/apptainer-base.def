@@ -97,6 +97,23 @@ echo "SCIPION_LOGS = ${SCIPION_USER_DATA}/logs" >> /scipion/config/scipion.conf
 # To fix this, you should force a reinstallation of NumPy in your environment so that the correct standard CPython version is downloaded and/or compiled.
 /scipion/scipion3 run conda install -y --force-reinstall -c conda-forge numpy=1.24.4 python=${PYTHON_VERSION}.*=*cpython*
 
+# Scipion's framework (scipion-pyworkflow / scipion-em / scipion-app) imports
+# pkg_resources at runtime, which is provided by setuptools. Legacy Python 3.8
+# envs shipped setuptools; modern Python conda envs do not, and setuptools >= 81
+# has dropped pkg_resources -- either case gives "No module named 'pkg_resources'".
+# So install a providing version only for the Python versions that need it, keyed
+# off PYTHON_VERSION. Edit SETUPTOOLS_FIX_MIN if you change PYTHON_VERSION to a
+# different interpreter (it is the first Python minor treated as "modern").
+SETUPTOOLS_FIX_MIN="3.9"
+_py_num=$(printf '%s' "$PYTHON_VERSION"      | awk -F. '{printf "%d%03d", $1, $2}')
+_min_num=$(printf '%s' "$SETUPTOOLS_FIX_MIN" | awk -F. '{printf "%d%03d", $1, $2}')
+if [ "$_py_num" -ge "$_min_num" ]; then
+    echo "Python $PYTHON_VERSION >= $SETUPTOOLS_FIX_MIN: installing setuptools<81 so pkg_resources is available"
+    /scipion/scipion3 run pip install "setuptools<81"
+else
+    echo "Python $PYTHON_VERSION < $SETUPTOOLS_FIX_MIN: keeping the environment's bundled setuptools"
+fi
+
 # Basic programs:
 # Xmipp: if the installation fails, it finds the CMakeError.log and prints it on the terminal
 /scipion/scipion3 installp -p scipion-em-xmipp -j "$(nproc)" || (find . -name "CMakeError.log" -exec cat {} + && exit 1)
